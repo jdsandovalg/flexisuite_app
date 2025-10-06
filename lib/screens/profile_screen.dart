@@ -2,8 +2,11 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'dart:convert'; // Importar la librería para JSON
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flexisuite_web/models/app_state.dart';
-import 'package:flexisuite_web/widgets/profile_photo_picker.dart';
+import 'package:intl/intl.dart';
+import '../models/app_state.dart';
+import 'package:flexisuite_shared/flexisuite_shared.dart'; // Importar el paquete compartido
+import '../widgets/profile_photo_picker.dart';
+import '../services/log_service.dart'; // Import LogService
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,8 +18,11 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = true;
+  final _logService = LogService(); // Instanciar LogService
+
   Map<String, dynamic> _profileData = {};
-  List<Map<String, dynamic>> _locations = [];
+  List<Map<String, dynamic>> _accessCards = [];
+  List<Map<String, dynamic>> _userFees = [];
   String? _selectedLocationId;
 
   // Controllers for form fields
@@ -36,6 +42,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isPrivate = false;
   bool _chatOptIn = false;
 
+  // Control para el ToggleButton
+  int _selectedViewIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +52,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Listeners para validar contraseñas en tiempo real
     _passwordController.addListener(_validatePasswords);
     _confirmPasswordController.addListener(_validatePasswords);
+  }
+
+  @override
+  void dispose() {
+    _passwordController.removeListener(_validatePasswords);
+    _confirmPasswordController.removeListener(_validatePasswords);
+    // ... otros dispose
+    super.dispose();
   }
 
   void _validatePasswords() {
@@ -53,7 +70,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await Future.wait([
         _loadProfileData(),
-        // _loadLocations(), // Ya no es necesario cargar todas las ubicaciones
+        _fetchAccessCards(),
+        _fetchUserFees(),
       ]);
     } catch (error) {
       if (mounted) {
@@ -73,35 +91,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _loadLocations() async {
-    final result = await Supabase.instance.client.rpc(
-      'get_locations_tree', // <-- REVERTIDO: Volvemos a la función original
-      params: {
-        'p_organization_id': AppState.currentUser!.organizationId,
-      },
-    );
-
-    if (mounted) {
-      // La función ahora devuelve un único objeto jsonb que contiene la lista.
-      // Necesitamos decodificarlo si no es ya una lista.
-      List<dynamic> locationsData = [];
-      if (result is String) {
-        locationsData = json.decode(result) as List<dynamic>;
-      } else if (result is List) {
-        locationsData = result;
-      }
-      final locations = locationsData.map((e) => e as Map<String, dynamic>)
-          .toList();
-      setState(() {
-        _locations = locations;
-        // Asegurarse de que la ubicación del perfil se mantenga seleccionada
-        if (_profileData.containsKey('location_id')) {
-          _selectedLocationId = _profileData['location_id'];
-        }
-      });
-    }
-  }
-
   Future<void> _loadProfileData() async {
     final result = await Supabase.instance.client.rpc(
       'manage_user_profile',
@@ -110,20 +99,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'p_user_id': AppState.currentUser!.id,
       },
     );
-
     if (mounted) {
       if (result is List && result.isNotEmpty) {
-        // Si el resultado es una lista (como se espera de una función que devuelve TABLE), tomamos el primer elemento.
         _profileData = result.first as Map<String, dynamic>;
-      } else if (result is String && result.isNotEmpty) {
-        // Si devuelve un string JSON, lo decodificamos.
-        _profileData = (json.decode(result) as List).first as Map<String, dynamic>;
-      } else if (result is Map) {
-        _profileData = result as Map<String, dynamic>;
       } else {
-        throw Exception("Unexpected data format from server: $result");
+        throw Exception("No se pudo cargar el perfil del usuario.");
       }
-
       _firstNameController.text = _profileData['first_name'] ?? '';
       _lastNameController.text = _profileData['last_name'] ?? '';
       _birthDateController.text = _profileData['birth_date'] ?? '';
@@ -131,20 +112,103 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _photoUrlController.text = _profileData['photo_url'] ?? '';
       _emailController.text = _profileData['email'] ?? '';
       _phoneController.text = _profileData['phone'] ?? '';
-      _selectedLocationId = _profileData['location_id'];
       _condoController.text = _profileData['condo'] ?? '';
       _floorController.text = _profileData['floor'] ?? '';
       _unitNumberController.text = _profileData['unit_number'] ?? '';
       _isPrivate = _profileData['is_private'] ?? false;
       _chatOptIn = _profileData['chat_opt_in'] ?? false;
 
-      // Decodificar el campo location_path si es un string JSON
-      final locationPathValue = _profileData['location_path'];
-      if (locationPathValue is String && locationPathValue.startsWith('{')) {
-        final decodedPath = json.decode(locationPathValue);
-        _locationPathController.text = decodedPath['path_text'] ?? 'No asignada';
-      } else {
-        _locationPathController.text = locationPathValue ?? 'No asignada';
+      // Obtenemos la ubicación usando la nueva lógica
+      try {
+        final pathResult = await Supabase.instance.client.rpc(
+          'get_location_path',
+          params: {'p_location_id': null, 'p_user_id': AppState.currentUser!.id},
+        );
+        final pathData = pathResult as Map<String, dynamic>?;
+        final pathIds = List<String>.from(pathData?['path_ids'] ?? []);
+        _selectedLocationId = pathIds.isNotEmpty ? pathIds.first : null;
+        _locationPathController.text = pathData?['path_text'] ?? 'Ubicación no encontrada';
+      } catch (e) {
+        _locationPathController.text = 'Error al obtener ubicación';
+      }
+      setState(() {});
+    }
+  }
+
+  Future<void> _fetchAccessCards() async {
+    final result = await Supabase.instance.client.rpc(
+      'manage_access_cards',
+      params: {
+        'p_action': 'select',
+        'p_user_id': AppState.currentUser!.id,
+        'p_organization_id': AppState.currentUser!.organizationId,
+        // Pasamos null al resto de parámetros para que la firma coincida.
+        'p_card_id': null, 'p_vehicular_id': null, 'p_pedestrian_id': null, 'p_is_active': null, 'p_created_by': null,
+      },
+    );
+    if (mounted) {
+      setState(() => _accessCards = List<Map<String, dynamic>>.from(result));
+    }
+  }
+
+  Future<void> _fetchUserFees() async {
+    final result = await Supabase.instance.client.rpc(
+      'get_user_fees',
+      params: {
+        'p_user_id': AppState.currentUser!.id,
+        'p_organization_id': AppState.currentUser!.organizationId, // Añadimos el ID de la organización
+      },
+    );
+    _logService.log('Calling get_user_fees with p_user_id: ${AppState.currentUser!.id}, p_organization_id: ${AppState.currentUser!.organizationId}');
+    _logService.log('Raw response from get_user_fees: $result');
+
+    if (mounted) {
+      try {
+        // Verificamos que el resultado sea una lista antes de intentar la conversión.
+        if (result is List) {
+          setState(() => _userFees = List<Map<String, dynamic>>.from(result));
+        } else {
+          _logService.log('Error: La respuesta de get_user_fees no es una lista. Tipo recibido: ${result.runtimeType}');
+          setState(() => _userFees = []); // Asignamos una lista vacía para evitar errores.
+        }
+      } catch (e) {
+        _logService.log('Error al procesar la respuesta de get_user_fees: $e');
+      }
+    }
+  }
+
+  Future<void> _uploadProfilePicture(Uint8List fileBytes, String fileName) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final bucket = Supabase.instance.client.storage.from('profile-pictures'); // No necesita user.id aquí
+      final fileExt = fileName.split('.').last;
+      final newFileName = '${AppState.currentUser!.id}.$fileExt';
+
+      await bucket.uploadBinary(
+        newFileName,
+        fileBytes,
+        fileOptions: const FileOptions(upsert: true),
+      );
+
+      final url = bucket.getPublicUrl(newFileName);
+
+      if (mounted) {
+        setState(() => _photoUrlController.text = url);
+        await _saveProfile();
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: SelectableText('Error al subir la foto: $error'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -153,13 +217,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      final paramsToSend = {
+      final paramsToSend = { // No necesita user.id aquí
         'p_action': 'update',
         'p_user_id': AppState.currentUser!.id,
         'p_first_name': _firstNameController.text,
@@ -180,7 +241,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? _photoUrlController.text.split('/').last.split('?').first
             : null,
       };
-      print('Enviando parámetros a manage_user_profile: $paramsToSend');
 
       await Supabase.instance.client.rpc(
         'manage_user_profile',
@@ -194,13 +254,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.of(context).pop();
       }
     } catch (error) {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: SelectableText('Error al guardar el perfil: $error'),
@@ -208,303 +264,397 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
-  Future<void> _uploadProfilePicture(Uint8List fileBytes, String fileName) async {
-    setState(() {
-      _isLoading = true;
-    });
+  Widget _buildAccessCardsCarousel() {
+    final theme = Theme.of(context);
 
-    try {
-      final bucket = Supabase.instance.client.storage.from('profile-pictures');
-      final fileExt = fileName.split('.').last;
-      final newFileName = '${AppState.currentUser!.id}.$fileExt';
-
-      await bucket.uploadBinary(
-        newFileName,
-        fileBytes,
-        fileOptions: FileOptions(upsert: true, contentType: 'image/$fileExt'),
+    if (_accessCards.isEmpty) {
+      return Center(
+        child: GlassCard(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+          child: const Text(
+            'No tienes tarjetas de acceso asignadas.',
+            textAlign: TextAlign.center,
+          ),
+        ),
       );
-
-      final url = bucket.getPublicUrl(newFileName);
-
-      if (mounted) {
-        setState(() {
-          _photoUrlController.text = url;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Foto de perfil actualizada.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        // Save the updated photo URL to the database
-        print('Llamando a _saveProfile() desde _uploadProfilePicture...');
-        await _saveProfile();
-      }
-    } catch (error) {
-      print('Error en _uploadProfilePicture: $error');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: SelectableText('Error al subir la foto: $error'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
     }
+    // Cambiamos a un ListView vertical para que cada tarjeta ocupe el ancho completo.
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          itemCount: _accessCards.length,
+          itemBuilder: (context, index) {
+            final card = _accessCards[index];
+            final bool isActive = card['is_active'] ?? false;
+            return GlassCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Vehicular: ${card['vehicular_id'] ?? 'N/A'}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text('Peatonal: ${card['pedestrian_id'] ?? 'N/A'}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text('Estado: ', style: theme.textTheme.bodySmall),
+                      Icon(isActive ? Icons.check_circle : Icons.cancel, color: isActive ? theme.colorScheme.primary : theme.colorScheme.error, size: 16),
+                      Text(isActive ? ' Activa' : ' Inactiva', style: TextStyle(color: isActive ? theme.colorScheme.primary : theme.colorScheme.error, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserFeesCarousel() {
+    final theme = Theme.of(context);
+
+    if (_userFees.isEmpty) {
+      return Center(
+        child: GlassCard(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+          child: const Text(
+            'No tienes cuotas asignadas.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+    // Usamos Center y ConstrainedBox para mantener un ancho máximo consistente.
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          itemCount: _userFees.length, // Ahora _userFees es una lista de propiedades
+          itemBuilder: (context, index) {
+            final property = _userFees[index];
+            final locationName = property['location_name'] ?? 'Propiedad sin nombre';
+            final feesForProperty = List<Map<String, dynamic>>.from(property['fees'] ?? []);
+
+            return GlassCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Mostramos el nombre de la propiedad
+                  Text(
+                    locationName,
+                    style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary),
+                  ),
+                  const Divider(height: 16),
+                  // Si no hay cuotas para esta propiedad, mostramos un mensaje.
+                  if (feesForProperty.isEmpty)
+                    const Text('No hay cuotas asignadas a esta propiedad.')
+                  else
+                    // Usamos un Column para listar las cuotas de esta propiedad.
+                    Column(
+                      children: feesForProperty.map((fee) {
+                        final bool isCurrent = fee['is_current'] ?? false;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(fee['fee_name'] ?? 'N/A', style: theme.textTheme.bodyLarge),
+                                    Row(children: [
+                                      Icon(isCurrent ? Icons.check_circle : Icons.cancel, color: isCurrent ? theme.colorScheme.primary : theme.colorScheme.error, size: 14),
+                                      const SizedBox(width: 4),
+                                      Text(isCurrent ? 'Vigente' : 'No Vigente', style: theme.textTheme.bodySmall?.copyWith(color: isCurrent ? theme.colorScheme.primary : theme.colorScheme.error)),
+                                    ]),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                'Q${(fee['fee_amount'] as num? ?? 0).toStringAsFixed(2)}',
+                                style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final editableInputDecoration = InputDecoration(
-      border: const OutlineInputBorder(),
-    );
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editar Perfil'),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        ProfilePhotoPicker(
-                          initialImageUrl: _photoUrlController.text,
-                          onPhotoPicked: (fileBytes, fileName) {
-                            _uploadProfilePicture(fileBytes, fileName);
-                          },
-                        ),
-                        const SizedBox(height: 24),
-                        Card(
-                          elevation: 2,
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Información Personal', style: Theme.of(context).textTheme.titleLarge),
-                                const SizedBox(height: 16),
-                                Row(children: [
-                                  Expanded(child: TextFormField(
-                                  controller: _firstNameController,
-                                  decoration: editableInputDecoration.copyWith(labelText: 'Nombre'),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Este campo es requerido';
-                                    }
-                                    return null;
-                                  },
-                                  )),
-                                  const SizedBox(width: 16),
-                                  Expanded(child: TextFormField(
-                                  controller: _lastNameController,
-                                  decoration: editableInputDecoration.copyWith(labelText: 'Apellido'),
-                                  )),
-                                ],),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _emailController,
-                                  decoration: editableInputDecoration.copyWith(labelText: 'Correo Electrónico'),
-                                  readOnly: true,
-                                ),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _birthDateController,
-                                  decoration: editableInputDecoration.copyWith(labelText: 'Fecha de Nacimiento'),
-                                  onTap: () async {
-                                    FocusScope.of(context).requestFocus(FocusNode());
-                                    final date = await showDatePicker(
-                                      context: context,
-                                      initialDate: DateTime.now(),
-                                      firstDate: DateTime(1900),
-                                      lastDate: DateTime.now(),
-                                    );
-                                    if (date != null) {
-                                      _birthDateController.text = date.toIso8601String().split('T').first;
-                                    }
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _phoneController,
-                                  decoration: editableInputDecoration.copyWith(labelText: 'Teléfono'),
-                                ),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _bioController,
-                                  decoration: editableInputDecoration.copyWith(labelText: 'Biografía'),
-                                  maxLines: 3,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Card(
-                          elevation: 2,
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Información de Residencia', style: Theme.of(context).textTheme.titleLarge),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _locationPathController,
-                                  decoration: editableInputDecoration.copyWith(
-                                    labelText: 'Ubicación',
-                                    filled: true, // Color de fondo para indicar que no es editable
-                                    fillColor: Colors.grey[200],
-                                  ),
-                                  style: const TextStyle(fontSize: 12), // Reducir el tamaño de la fuente
-                                  readOnly: true, // Hacer el campo de solo lectura
-                                ),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _condoController,
-                                  decoration: editableInputDecoration.copyWith(labelText: 'Condominio'),
-                                ),
-                                const SizedBox(height: 16),
-                                Row(children: [
-                                  Expanded(child: TextFormField(
-                                    controller: _floorController,
-                                    decoration: editableInputDecoration.copyWith(labelText: 'Piso'),
-                                  )),
-                                  const SizedBox(width: 16),
-                                  Expanded(child: TextFormField(
-                                    controller: _unitNumberController,
-                                    decoration: editableInputDecoration.copyWith(labelText: 'Número de Unidad/Casa'),
-                                  )),
-                                ],),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Card(
-                          elevation: 2,
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Seguridad y Privacidad', style: Theme.of(context).textTheme.titleLarge),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _passwordController,
-                                  decoration: editableInputDecoration.copyWith(
-                                    labelText: 'Nueva Contraseña (dejar en blanco para no cambiar)',
-                                    helperText: 'Mínimo 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 símbolo (!@#\$&*~).',
-                                    helperMaxLines: 2,
-                                  ),
-                                  obscureText: true,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return null; // No validar si está vacío
-                                    }
-
-                                    // Regex para validar contraseña fuerte
-                                    String pattern = r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
-                                    RegExp regExp = RegExp(pattern);
-
-                                    if (!regExp.hasMatch(value)) {
-                                      return 'Debe tener 8+ caracteres, mayúscula, minúscula, número y símbolo.';
-                                    }
-
-                                    // if (value.length < 8) return 'Debe tener al menos 8 caracteres.';
-                                    // if (!value.contains(RegExp(r'[A-Z]'))) return 'Debe tener al menos una mayúscula.';
-                                    // if (!value.contains(RegExp(r'[a-z]'))) return 'Debe tener al menos una minúscula.';
-                                    // if (!value.contains(RegExp(r'[0-9]'))) return 'Debe tener al menos un número.';
-                                    // if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) return 'Debe tener al menos un símbolo especial.';
-
-                                    // Si el campo de confirmar contraseña no está vacío, valida que coincidan
-                                    if (_confirmPasswordController.text.isNotEmpty && value != _confirmPasswordController.text) {
-                                      return 'Las contraseñas no coinciden';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _confirmPasswordController,
-                                  decoration: editableInputDecoration.copyWith(
-                                    labelText: 'Confirmar Nueva Contraseña',
-                                    suffixIcon: _buildPasswordMatchIcon(),
-                                  ),
-                                  obscureText: true,
-                                  validator: (value) {
-                                    if (_passwordController.text.isNotEmpty && value != _passwordController.text) {
-                                      return 'Las contraseñas no coinciden';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                CheckboxListTile(
-                                  title: const Text('Cuenta Privada'),
-                                  value: _isPrivate,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _isPrivate = value ?? false;
-                                    });
-                                  },
-                                ),
-                                CheckboxListTile(
-                                  title: const Text('Recibir Notificaciones de Chat'),
-                                  value: _chatOptIn,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _chatOptIn = value ?? false;
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+      backgroundColor: Colors.transparent, // Fondo transparente para que se vea el AppBackground
+      body: AppBackground(
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Stack(
+                children: [
+                  // Contenido principal
+                  Column(
+                    children: [
+                      const SizedBox(height: 80), // Espacio para el título flotante
+                      FilterStrip(
+                        options: const ['Perfil', 'Mis Tarjetas', 'Mis Cuotas'],
+                        selectedIndex: _selectedViewIndex,
+                        onSelected: (index) {
+                          setState(() {
+                            _selectedViewIndex = index;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: IndexedStack(
+                          index: _selectedViewIndex,
                           children: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Cancelar'),
-                            ),
-                            const SizedBox(width: 10),
-                            ElevatedButton(
-                              onPressed: _isLoading ? null : _saveProfile,
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                textStyle: const TextStyle(fontSize: 16),
+                            // Vista 0: Perfil General
+                            SingleChildScrollView(
+                              padding: const EdgeInsets.all(16),
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: 600),
+                                  child: Form(
+                                    key: _formKey,
+                                    child: Column(
+                                      children: [
+                                        ProfilePhotoPicker(
+                                          initialImageUrl: _photoUrlController.text,
+                                          onPhotoPicked: (fileBytes, fileName) {
+                                            _uploadProfilePicture(fileBytes, fileName);
+                                          },
+                                        ),
+                                        const SizedBox(height: 24),
+                                        GlassCard(
+                                          child: Theme(
+                                            data: Theme.of(context).copyWith(inputDecorationTheme: Theme.of(context).inputDecorationTheme),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Información Personal', style: Theme.of(context).textTheme.titleLarge),
+                                                const SizedBox(height: 16),
+                                                Row(children: [
+                                                  Expanded(child: TextFormField(
+                                                  controller: _firstNameController,
+                                                  decoration: const InputDecoration(labelText: 'Nombre'),
+                                                  validator: (value) {
+                                                    if (value == null || value.isEmpty) {
+                                                      return 'Este campo es requerido';
+                                                    }
+                                                    return null;
+                                                  },
+                                                  )),
+                                                  const SizedBox(width: 16),
+                                                  Expanded(child: TextFormField(
+                                                  controller: _lastNameController,
+                                                  decoration: const InputDecoration(labelText: 'Apellido'),
+                                                  )),
+                                                ],),
+                                                const SizedBox(height: 16),
+                                                TextFormField(
+                                                  controller: _emailController,
+                                                  decoration: const InputDecoration(labelText: 'Correo Electrónico'),
+                                                  readOnly: true,
+                                                ),
+                                                const SizedBox(height: 16),
+                                                TextFormField(
+                                                  controller: _birthDateController,
+                                                  decoration: const InputDecoration(labelText: 'Fecha de Nacimiento'),
+                                                  onTap: () async {
+                                                    FocusScope.of(context).requestFocus(FocusNode());
+                                                    final date = await showDatePicker(
+                                                      context: context,
+                                                      initialDate: DateTime.now(),
+                                                      firstDate: DateTime(1900),
+                                                      lastDate: DateTime.now(),
+                                                    );
+                                                    if (date != null) {
+                                                      _birthDateController.text = date.toIso8601String().split('T').first;
+                                                    }
+                                                  },
+                                                ),
+                                                const SizedBox(height: 16),
+                                                TextFormField(
+                                                  controller: _phoneController,
+                                                  decoration: const InputDecoration(labelText: 'Teléfono'),
+                                                ),
+                                                const SizedBox(height: 16),
+                                                TextFormField(
+                                                  controller: _bioController,
+                                                  decoration: const InputDecoration(labelText: 'Biografía'),
+                                                  maxLines: 3,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        GlassCard(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text('Información de Residencia', style: Theme.of(context).textTheme.titleLarge),                                          
+                                              TextFormField(
+                                                controller: _condoController,
+                                                decoration: const InputDecoration(labelText: 'Condominio'),
+                                              ),
+                                              const SizedBox(height: 16),
+                                              Row(children: [
+                                                Expanded(child: TextFormField(
+                                                  controller: _floorController,
+                                                  decoration: const InputDecoration(labelText: 'Piso'),
+                                                )),
+                                                const SizedBox(width: 16),
+                                                Expanded(child: TextFormField(
+                                                  controller: _unitNumberController,
+                                                  decoration: const InputDecoration(labelText: 'Número de Unidad/Casa'),
+                                                )),
+                                              ],),
+                                            ],
+                                          ),
+                                        ),
+                                        GlassCard(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text('Seguridad y Privacidad', style: Theme.of(context).textTheme.titleLarge),
+                                              const SizedBox(height: 16),
+                                              TextFormField(
+                                                controller: _passwordController,
+                                                decoration: const InputDecoration(
+                                                  labelText: 'Nueva Contraseña (dejar en blanco para no cambiar)',
+                                                  helperText: 'Mínimo 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 símbolo (!@#\$&*~).',
+                                                  helperMaxLines: 2,
+                                                ),
+                                                obscureText: true,
+                                                validator: (value) {
+                                                  if (value == null || value.isEmpty) {
+                                                    return null; // No validar si está vacío
+                                                  }
+                                                  String pattern = r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
+                                                  if (!RegExp(pattern).hasMatch(value)) {
+                                                    return 'La contraseña no cumple los requisitos.';
+                                                  }
+                                                  if (_confirmPasswordController.text.isNotEmpty && value != _confirmPasswordController.text) {
+                                                    return 'Las contraseñas no coinciden';
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                              const SizedBox(height: 16),
+                                              TextFormField(
+                                                controller: _confirmPasswordController,
+                                                decoration: InputDecoration(
+                                                  labelText: 'Confirmar Nueva Contraseña',
+                                                  suffixIcon: _buildPasswordMatchIcon(),
+                                                ),
+                                                obscureText: true,
+                                                validator: (value) {
+                                                  if (_passwordController.text.isNotEmpty && value != _passwordController.text) {
+                                                    return 'Las contraseñas no coinciden';
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                              const SizedBox(height: 16),
+                                              CheckboxListTile(
+                                                title: const Text('Cuenta Privada'),
+                                                value: _isPrivate,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    _isPrivate = value ?? false;
+                                                  });
+                                                },
+                                              ),
+                                              CheckboxListTile(
+                                                title: const Text('Recibir Notificaciones de Chat'),
+                                                value: _chatOptIn,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    _chatOptIn = value ?? false;
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 24),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(context).pop(),
+                                              child: const Text('Cancelar'),
+                                            ),
+                                            const SizedBox(width: 10),
+                                            ElevatedButton(
+                                              onPressed: _isLoading ? null : _saveProfile,
+                                              style: ElevatedButton.styleFrom(
+                                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                                textStyle: const TextStyle(fontSize: 16),
+                                              ),
+                                              child: _isLoading
+                                                  ? const CircularProgressIndicator(color: Colors.white)
+                                                  : const Text('Guardar Cambios'),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
-                              child: _isLoading
-                                  ? const CircularProgressIndicator(color: Colors.white)
-                                  : const Text('Guardar Cambios'),
                             ),
+                            // Vista 1: Mis Tarjetas de Acceso
+                              _buildAccessCardsCarousel(),
+                            // Vista 2: Mis Cuotas
+                            _buildUserFeesCarousel(),
                           ],
                         ),
+                      ),
+                    ],
+                  ),
+                  // Título y botón de atrás superpuestos
+                  Positioned(
+                    top: 40,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      children: [
+                        IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
+                        Expanded(
+                          child: Text(
+                            'Editar Perfil',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ),
+                        const SizedBox(width: 48), // Espacio para balancear el IconButton
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
-            ),
+      ),
     );
   }
 
@@ -519,13 +669,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else {
       return const Icon(Icons.error, color: Colors.red); // Check rojo (o error)
     }
-  }
-
-  @override
-  void dispose() {
-    _passwordController.removeListener(_validatePasswords);
-    _confirmPasswordController.removeListener(_validatePasswords);
-    // ... otros dispose
-    super.dispose();
   }
 }

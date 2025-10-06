@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flexisuite_web/models/app_state.dart'; // Assuming this path
+import '../models/app_state.dart'; // Assuming this path
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,27 +16,16 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _redirect() async {
-    await Future.delayed(Duration.zero); // Ensure widget is mounted
+    // Esperamos un momento para que la UI se estabilice y para dar una sensación de carga.
+    await Future.delayed(const Duration(seconds: 1));
 
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      final AuthChangeEvent event = data.event;
-      final Session? session = data.session;
-
-      if (event == AuthChangeEvent.signedIn && session != null) {
-        // Assuming AppState.currentUser is set in LoginScreen or similar
-        // If not, you might need to fetch user data here
-        _navigateToMenu();
-      } else if (event == AuthChangeEvent.signedOut) {
-        AppState.currentUser = null; // Clear current user on sign out
-        _navigateToLogin();
-      } else if (event == AuthChangeEvent.initialSession && session != null) {
-        // Handle initial session if user is already logged in
-        _navigateToMenu();
-      } else if (event == AuthChangeEvent.initialSession && session == null) {
-        // No initial session, navigate to login
-        _navigateToLogin();
-      }
-    });
+    // Nuestra lógica es simple: si hay un usuario en el estado de la app, va al menú.
+    // Si no, va al login. El login se encarga de poblar AppState.currentUser.
+    if (AppState.currentUser != null) {
+      _navigateToMenu();
+    } else {
+      _navigateToLogin();
+    }
   }
 
   void _navigateToMenu() {

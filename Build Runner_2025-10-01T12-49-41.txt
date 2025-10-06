@@ -1,0 +1,295 @@
+
+Showing Recent Issues
+
+Build target Runner of project Runner with configuration Debug
+note: Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+note: Run script build phase 'Run Script' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+
+
+Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked.
+
+Run script build phase 'Run Script' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked.
+
+GenerateAssetSymbols /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets (in target 'Runner' from project 'Runner')
+    cd /Users/danielsandovalsr/flexisuite/flexisuite_app/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets --compile /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Products/Debug-iphoneos/Runner.app --output-format human-readable-text --notices --warnings --export-dependency-info /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_dependencies --output-partial-info-plist /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_generated_info.plist --app-icon AppIcon --compress-pngs --enable-on-demand-resources YES --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 13.0 --platform iphoneos --bundle-identifier com.example.flexisuiteWeb --generate-swift-asset-symbol-extensions NO --generate-swift-asset-symbols /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols.swift --generate-objc-asset-symbols /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols.h --generate-asset-symbol-index /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+
+/* com.apple.actool.document.warnings */
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets:./AppIcon.appiconset/(null)[2d][Icon-App-50x50@1x.png]: warning: The app icon set "AppIcon" has 6 unassigned children.
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets:./AppIcon.appiconset/(null)[2d][Icon-App-50x50@1x.png]: warning: The app icon set "AppIcon" has 6 unassigned children.
+/* com.apple.actool.compilation-results */
+/Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols.h
+/Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols.swift
+
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets:./AppIcon.appiconset/(null)[2d][Icon-App-50x50@1x.png]: The app icon set "AppIcon" has 6 unassigned children.
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets:./AppIcon.appiconset/(null)[2d][Icon-App-50x50@1x.png]: The app icon set "AppIcon" has 6 unassigned children.
+
+CompileAssetCatalogVariant thinned /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Products/Debug-iphoneos/Runner.app /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets (in target 'Runner' from project 'Runner')
+    cd /Users/danielsandovalsr/flexisuite/flexisuite_app/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets --compile /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --compress-pngs --enable-on-demand-resources YES --filter-for-thinning-device-configuration iPhone17,3 --filter-for-device-os-version 26.0.1 --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 13.0 --platform iphoneos
+
+objc[11462]: Class _NoAnimationDelegate is implemented in both /Library/Developer/CoreSimulator/Volumes/iOS_23A343/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks/SwiftUICore.framework/SwiftUICore (0x1460d8130) and /Library/Developer/CoreSimulator/Volumes/iOS_23A343/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/UIKitCore.framework/UIKitCore (0x143241198). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+/* com.apple.actool.document.warnings */
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets:./AppIcon.appiconset/(null)[2d][Icon-App-50x50@1x.png]: warning: The app icon set "AppIcon" has 6 unassigned children.
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets:./AppIcon.appiconset/(null)[2d][Icon-App-50x50@1x.png]: warning: The app icon set "AppIcon" has 6 unassigned children.
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets:./AppIcon.appiconset/(null)[2d][Icon-App-50x50@1x.png]: warning: The app icon set "AppIcon" has 6 unassigned children.
+/* com.apple.actool.document.notices */
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets:./AppIcon.appiconset/[][ipad][76x76][][][1x][][][][]: notice: 76x76@1x app icons only apply to iPad apps targeting releases of iOS prior to 10.0.
+/* com.apple.actool.compilation-results */
+/Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_generated_info.plist_thinned
+/Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/thinned/AppIcon60x60@2x.png
+/Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/thinned/AppIcon76x76@2x~ipad.png
+/Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/thinned/Assets.car
+
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets:./AppIcon.appiconset/(null)[2d][Icon-App-50x50@1x.png]: The app icon set "AppIcon" has 6 unassigned children.
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets:./AppIcon.appiconset/(null)[2d][Icon-App-50x50@1x.png]: The app icon set "AppIcon" has 6 unassigned children.
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets:./AppIcon.appiconset/(null)[2d][Icon-App-50x50@1x.png]: The app icon set "AppIcon" has 6 unassigned children.
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Runner/Assets.xcassets:./AppIcon.appiconset/[][ipad][76x76][][][1x][][][][]: 76x76@1x app icons only apply to iPad apps targeting releases of iOS prior to 10.0.
+
+
+Build target url_launcher_ios of project Pods with configuration Debug
+
+SwiftCompile normal arm64 Compiling\ URLLauncherPlugin.swift /Users/danielsandovalsr/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.4/ios/url_launcher_ios/Sources/url_launcher_ios/URLLauncherPlugin.swift (in target 'url_launcher_ios' from project 'Pods')
+
+SwiftCompile normal arm64 /Users/danielsandovalsr/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.4/ios/url_launcher_ios/Sources/url_launcher_ios/URLLauncherPlugin.swift (in target 'url_launcher_ios' from project 'Pods')
+    cd /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods
+    
+
+/Users/danielsandovalsr/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.4/ios/url_launcher_ios/Sources/url_launcher_ios/URLLauncherPlugin.swift:22:26: warning: 'keyWindow' was deprecated in iOS 13.0: Should not be used for applications that support multiple scenes as it returns a key window across all connected scenes
+    UIApplication.shared.keyWindow?.rootViewController?.topViewController
+                         ^
+
+/Users/danielsandovalsr/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.4/ios/url_launcher_ios/Sources/url_launcher_ios/URLLauncherPlugin.swift:22:26: 'keyWindow' was deprecated in iOS 13.0: Should not be used for applications that support multiple scenes as it returns a key window across all connected scenes
+
+
+Build target permission_handler_apple of project Pods with configuration Debug
+
+CompileC /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/permission_handler_apple.build/Objects-normal/arm64/PhonePermissionStrategy.o /Users/danielsandovalsr/.pub-cache/hosted/pub.dev/permission_handler_apple-9.1.4/ios/Classes/strategies/PhonePermissionStrategy.m normal arm64 objective-c com.apple.compilers.llvm.clang.1_0.compiler (in target 'permission_handler_apple' from project 'Pods')
+    cd /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods
+    
+    Using response file: /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/permission_handler_apple.build/Objects-normal/arm64/e6072d4f65d7061329687fe24e3d63a7-common-args.resp
+    
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x objective-c -ivfsstatcache /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.0-23A339-81ce72e5b06c9602b9d30b56f2eed08a.sdkstatcache -fmessage-length\=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit\=0 -fno-color-diagnostics -fmodules-prune-interval\=86400 -fmodules-prune-after\=345600 -fbuild-session-file\=/Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -fmodules-validate-once-per-build-session -Wnon-modular-include-in-framework-module -Werror\=non-modular-include-in-framework-module -Wno-trigraphs -Wno-missing-field-initializers -Wno-missing-prototypes -Werror\=return-type -Wdocumentation -Wunreachable-code -Wno-implicit-atomic-properties -Werror\=deprecated-objc-isa-usage -Wno-objc-interface-ivars -Werror\=objc-root-class -Wno-arc-repeated-use-of-weak -Wimplicit-retain-self -Wduplicate-method-match -Wno-missing-braces -Wparentheses -Wswitch -Wunused-function -Wno-unused-label -Wno-unused-parameter -Wunused-variable -Wunused-value -Wempty-body -Wuninitialized -Wconditional-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wconstant-conversion -Wint-conversion -Wbool-conversion -Wenum-conversion -Wno-float-conversion -Wnon-literal-null-conversion -Wobjc-literal-conversion -Wshorten-64-to-32 -Wpointer-sign -Wno-newline-eof -Wno-selector -Wno-strict-selector-match -Wundeclared-selector -Wdeprecated-implementations -Wno-implicit-fallthrough -fstrict-aliasing -Wprotocol -Wdeprecated-declarations -Wno-sign-conversion -Winfinite-recursion -Wcomma -Wblock-capture-autoreleasing -Wstrict-prototypes -Wno-semicolon-before-method-body -Wunguarded-availability -index-store-path /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Index.noindex/DataStore @/Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/permission_handler_apple.build/Objects-normal/arm64/e6072d4f65d7061329687fe24e3d63a7-common-args.resp -include /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Target\ Support\ Files/permission_handler_apple/permission_handler_apple-prefix.pch -MMD -MT dependencies -MF /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/permission_handler_apple.build/Objects-normal/arm64/PhonePermissionStrategy.d --serialize-diagnostics /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/permission_handler_apple.build/Objects-normal/arm64/PhonePermissionStrategy.dia -c /Users/danielsandovalsr/.pub-cache/hosted/pub.dev/permission_handler_apple-9.1.4/ios/Classes/strategies/PhonePermissionStrategy.m -o /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/permission_handler_apple.build/Objects-normal/arm64/PhonePermissionStrategy.o -index-unit-output-path /Pods.build/Debug-iphoneos/permission_handler_apple.build/Objects-normal/arm64/PhonePermissionStrategy.o
+
+/Users/danielsandovalsr/.pub-cache/hosted/pub.dev/permission_handler_apple-9.1.4/ios/Classes/strategies/PhonePermissionStrategy.m:49:35: warning: 'subscriberCellularProvider' is deprecated: first deprecated in iOS 12.0 [-Wdeprecated-declarations]
+   49 |     CTCarrier *carrier = [netInfo subscriberCellularProvider];
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                   serviceSubscriberCellularProviders
+In module 'CoreTelephony' imported from /Users/danielsandovalsr/.pub-cache/hosted/pub.dev/permission_handler_apple-9.1.4/ios/Classes/strategies/PhonePermissionStrategy.m:8:
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CoreTelephony.framework/Headers/CTTelephonyNetworkInfo.h:114:50: note: property 'subscriberCellularProvider' is declared deprecated here
+  114 | @property(readonly, retain, nullable) CTCarrier *subscriberCellularProvider API_DEPRECATED_WITH_REPLACEMENT("serviceSubscriberCellularProviders", ios(4.0, 12.0)) API_UNAVAILABLE(macos);
+      |                                                  ^
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CoreTelephony.framework/Headers/CTTelephonyNetworkInfo.h:114:50: note: 'subscriberCellularProvider' has been explicitly marked deprecated here
+1 warning generated.
+
+/Users/danielsandovalsr/.pub-cache/hosted/pub.dev/permission_handler_apple-9.1.4/ios/Classes/strategies/PhonePermissionStrategy.m:49:35: 'subscriberCellularProvider' is deprecated: first deprecated in iOS 12.0
+
+
+Build target share_plus of project Pods with configuration Debug
+
+CompileC /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/share_plus.build/Objects-normal/arm64/FPPSharePlusPlugin.o /Users/danielsandovalsr/.pub-cache/hosted/pub.dev/share_plus-9.0.0/ios/Classes/FPPSharePlusPlugin.m normal arm64 objective-c com.apple.compilers.llvm.clang.1_0.compiler (in target 'share_plus' from project 'Pods')
+    cd /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods
+    
+    Using response file: /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/share_plus.build/Objects-normal/arm64/e6072d4f65d7061329687fe24e3d63a7-common-args.resp
+    
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x objective-c -ivfsstatcache /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.0-23A339-81ce72e5b06c9602b9d30b56f2eed08a.sdkstatcache -fmessage-length\=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit\=0 -fno-color-diagnostics -fmodules-prune-interval\=86400 -fmodules-prune-after\=345600 -fbuild-session-file\=/Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -fmodules-validate-once-per-build-session -Wnon-modular-include-in-framework-module -Werror\=non-modular-include-in-framework-module -Wno-trigraphs -Wno-missing-field-initializers -Wno-missing-prototypes -Werror\=return-type -Wdocumentation -Wunreachable-code -Wno-implicit-atomic-properties -Werror\=deprecated-objc-isa-usage -Wno-objc-interface-ivars -Werror\=objc-root-class -Wno-arc-repeated-use-of-weak -Wimplicit-retain-self -Wduplicate-method-match -Wno-missing-braces -Wparentheses -Wswitch -Wunused-function -Wno-unused-label -Wno-unused-parameter -Wunused-variable -Wunused-value -Wempty-body -Wuninitialized -Wconditional-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wconstant-conversion -Wint-conversion -Wbool-conversion -Wenum-conversion -Wno-float-conversion -Wnon-literal-null-conversion -Wobjc-literal-conversion -Wshorten-64-to-32 -Wpointer-sign -Wno-newline-eof -Wno-selector -Wno-strict-selector-match -Wundeclared-selector -Wdeprecated-implementations -Wno-implicit-fallthrough -fstrict-aliasing -Wprotocol -Wdeprecated-declarations -Wno-sign-conversion -Winfinite-recursion -Wcomma -Wblock-capture-autoreleasing -Wstrict-prototypes -Wno-semicolon-before-method-body -Wunguarded-availability -index-store-path /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Index.noindex/DataStore @/Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/share_plus.build/Objects-normal/arm64/e6072d4f65d7061329687fe24e3d63a7-common-args.resp -include /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Target\ Support\ Files/share_plus/share_plus-prefix.pch -MMD -MT dependencies -MF /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/share_plus.build/Objects-normal/arm64/FPPSharePlusPlugin.d --serialize-diagnostics /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/share_plus.build/Objects-normal/arm64/FPPSharePlusPlugin.dia -c /Users/danielsandovalsr/.pub-cache/hosted/pub.dev/share_plus-9.0.0/ios/Classes/FPPSharePlusPlugin.m -o /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/share_plus.build/Objects-normal/arm64/FPPSharePlusPlugin.o -index-unit-output-path /Pods.build/Debug-iphoneos/share_plus.build/Objects-normal/arm64/FPPSharePlusPlugin.o
+
+/Users/danielsandovalsr/.pub-cache/hosted/pub.dev/share_plus-9.0.0/ios/Classes/FPPSharePlusPlugin.m:10:44: warning: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
+   10 | static UIViewController *RootViewController() {
+      |                                            ^
+      |                                             void
+/Users/danielsandovalsr/.pub-cache/hosted/pub.dev/share_plus-9.0.0/ios/Classes/FPPSharePlusPlugin.m:25:46: warning: 'keyWindow' is deprecated: first deprecated in iOS 13.0 - Should not be used for applications that support multiple scenes as it returns a key window across all connected scenes [-Wdeprecated-declarations]
+   25 |     return [UIApplication sharedApplication].keyWindow.rootViewController;
+      |                                              ^
+In module 'UIKit' imported from /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Target Support Files/share_plus/share_plus-prefix.pch:2:
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIApplication.h:108:51: note: 'keyWindow' has been explicitly marked deprecated here
+  108 | @property(nullable, nonatomic,readonly) UIWindow *keyWindow API_DEPRECATED("Should not be used for applications that support multiple scenes as it returns a key window across all connected scenes", ios(2.0, 13.0)) API_UNAVAILABLE(visionos, watchos);
+      |                                                   ^
+2 warnings generated.
+
+/Users/danielsandovalsr/.pub-cache/hosted/pub.dev/share_plus-9.0.0/ios/Classes/FPPSharePlusPlugin.m:10:44: A function declaration without a prototype is deprecated in all versions of C
+
+/Users/danielsandovalsr/.pub-cache/hosted/pub.dev/share_plus-9.0.0/ios/Classes/FPPSharePlusPlugin.m:25:46: 'keyWindow' is deprecated: first deprecated in iOS 13.0 - Should not be used for applications that support multiple scenes as it returns a key window across all connected scenes
+
+
+Build target geolocator_apple-geolocator_apple_privacy of project Pods with configuration Debug
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: warning: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but the range of supported deployment target versions is 12.0 to 26.0.99. (in target 'geolocator_apple-geolocator_apple_privacy' from project 'Pods')
+
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but the range of supported deployment target versions is 12.0 to 26.0.99.
+
+
+Build target file_picker-file_picker_ios_privacy of project Pods with configuration Debug
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: warning: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but the range of supported deployment target versions is 12.0 to 26.0.99. (in target 'file_picker-file_picker_ios_privacy' from project 'Pods')
+
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but the range of supported deployment target versions is 12.0 to 26.0.99.
+
+
+Build target file_picker of project Pods with configuration Debug
+
+CompileC /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/file_picker.build/Objects-normal/arm64/FilePickerPlugin.o /Users/danielsandovalsr/.pub-cache/hosted/pub.dev/file_picker-8.0.7/ios/Classes/FilePickerPlugin.m normal arm64 objective-c com.apple.compilers.llvm.clang.1_0.compiler (in target 'file_picker' from project 'Pods')
+    cd /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods
+    
+    Using response file: /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/file_picker.build/Objects-normal/arm64/e6072d4f65d7061329687fe24e3d63a7-common-args.resp
+    
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x objective-c -ivfsstatcache /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.0-23A339-81ce72e5b06c9602b9d30b56f2eed08a.sdkstatcache -fmessage-length\=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit\=0 -fno-color-diagnostics -fmodules-prune-interval\=86400 -fmodules-prune-after\=345600 -fbuild-session-file\=/Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -fmodules-validate-once-per-build-session -Wnon-modular-include-in-framework-module -Werror\=non-modular-include-in-framework-module -Wno-trigraphs -Wno-missing-field-initializers -Wno-missing-prototypes -Werror\=return-type -Wdocumentation -Wunreachable-code -Wno-implicit-atomic-properties -Werror\=deprecated-objc-isa-usage -Wno-objc-interface-ivars -Werror\=objc-root-class -Wno-arc-repeated-use-of-weak -Wimplicit-retain-self -Wduplicate-method-match -Wno-missing-braces -Wparentheses -Wswitch -Wunused-function -Wno-unused-label -Wno-unused-parameter -Wunused-variable -Wunused-value -Wempty-body -Wuninitialized -Wconditional-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wconstant-conversion -Wint-conversion -Wbool-conversion -Wenum-conversion -Wno-float-conversion -Wnon-literal-null-conversion -Wobjc-literal-conversion -Wshorten-64-to-32 -Wpointer-sign -Wno-newline-eof -Wno-selector -Wno-strict-selector-match -Wundeclared-selector -Wdeprecated-implementations -Wno-implicit-fallthrough -fstrict-aliasing -Wprotocol -Wdeprecated-declarations -Wno-sign-conversion -Winfinite-recursion -Wcomma -Wblock-capture-autoreleasing -Wstrict-prototypes -Wno-semicolon-before-method-body -Wunguarded-availability -index-store-path /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Index.noindex/DataStore @/Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/file_picker.build/Objects-normal/arm64/e6072d4f65d7061329687fe24e3d63a7-common-args.resp -include /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Target\ Support\ Files/file_picker/file_picker-prefix.pch -MMD -MT dependencies -MF /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/file_picker.build/Objects-normal/arm64/FilePickerPlugin.d --serialize-diagnostics /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/file_picker.build/Objects-normal/arm64/FilePickerPlugin.dia -c /Users/danielsandovalsr/.pub-cache/hosted/pub.dev/file_picker-8.0.7/ios/Classes/FilePickerPlugin.m -o /Users/danielsandovalsr/Library/Developer/Xcode/DerivedData/Runner-ervjpkhbdhwjbkadldfsbmaaaaps/Build/Intermediates.noindex/Pods.build/Debug-iphoneos/file_picker.build/Objects-normal/arm64/FilePickerPlugin.o -index-unit-output-path /Pods.build/Debug-iphoneos/file_picker.build/Objects-normal/arm64/FilePickerPlugin.o
+
+/Users/danielsandovalsr/.pub-cache/hosted/pub.dev/file_picker-8.0.7/ios/Classes/FilePickerPlugin.m:289:106: warning: 'UIActivityIndicatorViewStyleWhite' is deprecated: first deprecated in iOS 13.0 [-Wdeprecated-declarations]
+  289 |     UIActivityIndicatorView* indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+      |                                                                                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                                                                          UIActivityIndicatorViewStyleMedium
+In module 'UIKit' imported from /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Target Support Files/file_picker/file_picker-prefix.pch:2:
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIActivityIndicatorView.h:19:5: note: 'UIActivityIndicatorViewStyleWhite' has been explicitly marked deprecated here
+   19 |     UIActivityIndicatorViewStyleWhite API_DEPRECATED_WITH_REPLACEMENT("UIActivityIndicatorViewStyleMedium", ios(2.0, 13.0), tvos(9.0, 13.0)) API_UNAVAILABLE(visionos, watchos) = 1,
+      |     ^
+/Users/danielsandovalsr/.pub-cache/hosted/pub.dev/file_picker-8.0.7/ios/Classes/FilePickerPlugin.m:405:17: warning: incompatible pointer types assigning to 'NSMutableArray<NSURL *> *' from 'NSArray<NSURL *> *' [-Wincompatible-pointer-types]
+  405 |         newUrls = urls;
+      |                 ^ ~~~~
+2 warnings generated.
+
+/Users/danielsandovalsr/.pub-cache/hosted/pub.dev/file_picker-8.0.7/ios/Classes/FilePickerPlugin.m:289:106: 'UIActivityIndicatorViewStyleWhite' is deprecated: first deprecated in iOS 13.0
+
+/Users/danielsandovalsr/.pub-cache/hosted/pub.dev/file_picker-8.0.7/ios/Classes/FilePickerPlugin.m:405:17: Incompatible pointer types assigning to 'NSMutableArray<NSURL *> *' from 'NSArray<NSURL *> *'
+
+
+Build target SwiftyGif-SwiftyGif of project Pods with configuration Debug
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: warning: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99. (in target 'SwiftyGif-SwiftyGif' from project 'Pods')
+
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99.
+
+
+Build target SwiftyGif of project Pods with configuration Debug
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: warning: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99. (in target 'SwiftyGif' from project 'Pods')
+
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99.
+
+
+Build target SDWebImage-SDWebImage of project Pods with configuration Debug
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: warning: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99. (in target 'SDWebImage-SDWebImage' from project 'Pods')
+
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99.
+
+
+Build target SDWebImage of project Pods with configuration Debug
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: warning: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99. (in target 'SDWebImage' from project 'Pods')
+
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99.
+
+
+Build target DKPhotoGallery-DKPhotoGallery of project Pods with configuration Debug
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: warning: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99. (in target 'DKPhotoGallery-DKPhotoGallery' from project 'Pods')
+
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99.
+
+
+Build target DKPhotoGallery of project Pods with configuration Debug
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: warning: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99. (in target 'DKPhotoGallery' from project 'Pods')
+
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99.
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ DKPhotoGallery (in target 'DKPhotoGallery' from project 'Pods')
+
+EmitSwiftModule normal arm64 (in target 'DKPhotoGallery' from project 'Pods')
+    cd /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods
+    
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift:39:52: warning: using 'class' keyword to define a class-constrained protocol is deprecated; use 'AnyObject' instead
+internal protocol DKPhotoGalleryContentDataSource: class {
+                                                   ^~~~~
+                                                   AnyObject
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift:55:50: warning: using 'class' keyword to define a class-constrained protocol is deprecated; use 'AnyObject' instead
+internal protocol DKPhotoGalleryContentDelegate: class {
+                                                 ^~~~~
+                                                 AnyObject
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift:39:52: Using 'class' keyword to define a class-constrained protocol is deprecated; use 'AnyObject' instead
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift:55:50: Using 'class' keyword to define a class-constrained protocol is deprecated; use 'AnyObject' instead
+
+SwiftCompile normal arm64 Compiling\ DKPhotoImageUtility.swift,\ DKPhotoImageView.swift,\ DKPhotoIncrementalIndicator.swift /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/Preview/ImagePreview/DKPhotoImageUtility.swift /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/Preview/ImagePreview/DKPhotoImageView.swift /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoIncrementalIndicator.swift (in target 'DKPhotoGallery' from project 'Pods')
+
+SwiftCompile normal arm64 /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoIncrementalIndicator.swift (in target 'DKPhotoGallery' from project 'Pods')
+    cd /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods
+    
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoIncrementalIndicator.swift:161:124: warning: forming 'UnsafeMutableRawPointer' to an inout variable of type String exposes the internal representation rather than the string contents.
+        scrollView.addObserver(self, forKeyPath: DKPhotoIncrementalIndicator.contentSizeKeyPath, options: [.new], context: &DKPhotoIncrementalIndicator.context)
+                                                                                                                           ^
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoIncrementalIndicator.swift:162:126: warning: forming 'UnsafeMutableRawPointer' to an inout variable of type String exposes the internal representation rather than the string contents.
+        scrollView.addObserver(self, forKeyPath: DKPhotoIncrementalIndicator.contentOffsetKeyPath, options: [.new], context: &DKPhotoIncrementalIndicator.context)
+                                                                                                                             ^
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoIncrementalIndicator.swift:171:23: warning: forming 'UnsafeMutableRawPointer' to an inout variable of type String exposes the internal representation rather than the string contents.
+        if context == &DKPhotoIncrementalIndicator.context {
+                      ^
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoIncrementalIndicator.swift:161:124: Forming 'UnsafeMutableRawPointer' to an inout variable of type String exposes the internal representation rather than the string contents.
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoIncrementalIndicator.swift:162:126: Forming 'UnsafeMutableRawPointer' to an inout variable of type String exposes the internal representation rather than the string contents.
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoIncrementalIndicator.swift:171:23: Forming 'UnsafeMutableRawPointer' to an inout variable of type String exposes the internal representation rather than the string contents.
+
+SwiftCompile normal arm64 Compiling\ DKPhotoContentAnimationView.swift,\ DKPhotoGallery.swift,\ DKPhotoGalleryContentVC.swift /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/Preview/DKPhotoContentAnimationView.swift /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGallery.swift /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift (in target 'DKPhotoGallery' from project 'Pods')
+
+SwiftCompile normal arm64 /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift (in target 'DKPhotoGallery' from project 'Pods')
+    cd /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods
+    
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift:39:52: warning: using 'class' keyword to define a class-constrained protocol is deprecated; use 'AnyObject' instead
+internal protocol DKPhotoGalleryContentDataSource: class {
+                                                   ^~~~~
+                                                   AnyObject
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift:55:50: warning: using 'class' keyword to define a class-constrained protocol is deprecated; use 'AnyObject' instead
+internal protocol DKPhotoGalleryContentDelegate: class {
+                                                 ^~~~~
+                                                 AnyObject
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift:39:52: Using 'class' keyword to define a class-constrained protocol is deprecated; use 'AnyObject' instead
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift:55:50: Using 'class' keyword to define a class-constrained protocol is deprecated; use 'AnyObject' instead
+
+
+Build target DKImagePickerController-DKImagePickerController of project Pods with configuration Debug
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: warning: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99. (in target 'DKImagePickerController-DKImagePickerController' from project 'Pods')
+
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99.
+
+
+Build target DKImagePickerController of project Pods with configuration Debug
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: warning: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99. (in target 'DKImagePickerController' from project 'Pods')
+
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/Pods.xcodeproj: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.0.99.
+
+SwiftCompile normal arm64 Compiling\ DKAssetGroupListVC.swift,\ DKImageAssetExporter.swift /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKImagePickerController/Sources/DKImagePickerController/View/DKAssetGroupListVC.swift /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKImagePickerController/Sources/DKImagePickerController/DKImageAssetExporter.swift (in target 'DKImagePickerController' from project 'Pods')
+
+SwiftCompile normal arm64 /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKImagePickerController/Sources/DKImagePickerController/DKImageAssetExporter.swift (in target 'DKImagePickerController' from project 'Pods')
+    cd /Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods
+    
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKImagePickerController/Sources/DKImagePickerController/DKImageAssetExporter.swift:557:38: warning: capture of 'fileManager' with non-Sendable type 'FileManager' in an isolated local function; this is an error in the Swift 6 language mode
+                                try? fileManager.removeItem(at: auxiliaryDirectory)
+                                     ^
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework/Headers/NSFileManager.h:96:12: note: class 'FileManager' does not conform to the 'Sendable' protocol
+@interface NSFileManager : NSObject
+           ^
+
+/Users/danielsandovalsr/flexisuite/flexisuite_app/ios/Pods/DKImagePickerController/Sources/DKImagePickerController/DKImageAssetExporter.swift:557:38: Capture of 'fileManager' with non-Sendable type 'FileManager' in an isolated local function; this is an error in the Swift 6 language mode
+
+
+
+Build succeeded    1/10/25, 12:50    21.8 seconds

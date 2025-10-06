@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/app_state.dart';
 
 class RestrictedAccessScreen extends StatelessWidget {
   final String userName;
@@ -20,7 +21,7 @@ class RestrictedAccessScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
-                'assets/logo.png',
+                'web/favicon.png',
                 height: 100,
               ),
               const SizedBox(height: 16),

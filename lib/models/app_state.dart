@@ -22,4 +22,10 @@ class UserModel {
 
 class AppState {
   static UserModel? currentUser;
+  // Mapa para almacenar parámetros de la organización (ej: {'ALLOW_QR_CODE_DISPLAY': false})
+  static Map<String, dynamic> organizationParameters = {};
+  // Lista para almacenar las características del plan del usuario.
+  static List<Map<String, dynamic>> userFeatures = [];
+  // Zona horaria de la organización (ej: 'America/Guatemala')
+  static String organizationTimeZone = 'UTC'; // Valor por defecto
 }

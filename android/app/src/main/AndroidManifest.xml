@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Permisos para Geolocalización -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application
-        android:label="flexisuite_web"
+        android:label="FlexiSuite"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

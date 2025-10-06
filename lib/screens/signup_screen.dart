@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flexisuite_shared/flexisuite_shared.dart'; // Importar para AppBackground y GlassCard
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -85,26 +86,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Unificar el estilo con la pantalla de perfil
-    final inputDecoration = const InputDecoration(border: OutlineInputBorder());
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Crear Nueva Cuenta')),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Card(
-                    elevation: 2,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: const Text('Crear Nueva Cuenta'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: AppBackground(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GlassCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -115,7 +115,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               Expanded(
                                 child: TextFormField(
                                   controller: _firstNameController,
-                                  decoration: inputDecoration.copyWith(labelText: 'Nombre'),
+                                  decoration: const InputDecoration(labelText: 'Nombre'),
                                   validator: (v) => v!.isEmpty ? 'Campo requerido' : null,
                                 ),
                               ),
@@ -123,7 +123,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               Expanded(
                                 child: TextFormField(
                                   controller: _lastNameController,
-                                  decoration: inputDecoration.copyWith(labelText: 'Apellido'),
+                                  decoration: const InputDecoration(labelText: 'Apellido'),
                                   validator: (v) => v!.isEmpty ? 'Campo requerido' : null,
                                 ),
                               ),
@@ -132,14 +132,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _emailController,
-                            decoration: inputDecoration.copyWith(labelText: 'Correo Electrónico'),
+                            decoration: const InputDecoration(labelText: 'Correo Electrónico'),
                             keyboardType: TextInputType.emailAddress,
                             validator: (v) => v!.isEmpty || !v.contains('@') ? 'Correo inválido' : null,
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _passwordController,
-                            decoration: inputDecoration.copyWith(
+                            decoration: const InputDecoration(
                               labelText: 'Contraseña',
                               helperText: 'Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.',
                               helperMaxLines: 2,
@@ -155,7 +155,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _confirmPasswordController,
-                            decoration: inputDecoration.copyWith(labelText: 'Confirmar Contraseña'),
+                            decoration: const InputDecoration(labelText: 'Confirmar Contraseña'),
                             obscureText: true,
                             validator: (v) {
                               if (v != _passwordController.text) return 'Las contraseñas no coinciden';
@@ -165,12 +165,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ],
                       ),
                     ),
-                  ),
-                  Card(
-                    elevation: 2,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                    GlassCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -178,39 +173,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _addressController,
-                            decoration: inputDecoration.copyWith(labelText: 'Dirección'),
+                            decoration: const InputDecoration(labelText: 'Dirección'),
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _condoController,
-                            decoration: inputDecoration.copyWith(labelText: 'Condominio'),
+                            decoration: const InputDecoration(labelText: 'Condominio'),
                           ),
                           const SizedBox(height: 16),
                           Row(
                             children: [
-                              Expanded(child: TextFormField(controller: _floorController, decoration: inputDecoration.copyWith(labelText: 'Piso'))),
+                              Expanded(child: TextFormField(controller: _floorController, decoration: const InputDecoration(labelText: 'Piso'))),
                               const SizedBox(width: 16),
-                              Expanded(child: TextFormField(controller: _unitNumberController, decoration: inputDecoration.copyWith(labelText: 'Número de Unidad/Casa'))),
+                              Expanded(child: TextFormField(controller: _unitNumberController, decoration: const InputDecoration(labelText: 'Número de Unidad/Casa'))),
                             ],
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _signUp,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _signUp,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: _isLoading
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text('Registrarme'),
                       ),
-                      child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Registrarme'),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

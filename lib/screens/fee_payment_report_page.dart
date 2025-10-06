@@ -1,5 +1,5 @@
-import 'dart:html' as html;
 import 'dart:typed_data';
+import 'package:flexisuite_shared/flexisuite_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
@@ -16,6 +16,9 @@ class FeePaymentReportPage extends StatefulWidget {
 class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _feeCharges = [];
+  
+  // Estado para el filtro de cuotas
+  int _selectedFilterIndex = 0; // 0: Pendientes, 1: Historial
 
   @override
   void initState() {
@@ -33,7 +36,10 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
     try {
       final response = await Supabase.instance.client.rpc(
         'mark_and_list_fee_charges_resident',
-        params: {'p_user_id': user.id},
+        params: {
+          'p_user_id': user.id,
+          'p_organization_id': user.organizationId, // Añadimos el ID de la organización
+        },
       );
 
       if (mounted) {
@@ -96,90 +102,177 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Reportar Pago de Cuotas')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _feeCharges.isEmpty
-                  ? const Center(child: Text('No tienes cuotas pendientes.'))
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16.0),
-                      itemCount: _feeCharges.length,
-                      itemBuilder: (context, index) {
-                        final charge = _feeCharges[index];
-                        final status = charge['status'] as String? ?? 'pending';
-                        final feeName = charge['fee_name'] as String? ?? 'Cuota';
-                        final feeDescription = charge['fee_description'] as String?;
-                        final amount = (charge['amount'] as num? ?? 0.0).toStringAsFixed(2);
-                        final bankName = charge['bank_name'] as String?;
-                        final bankAccount = charge['bank_account'] as String?;
-                        final chargeDate = charge['charge_date'] != null
-                            ? DateFormat('dd/MM/yyyy').format(DateTime.parse(charge['charge_date']))
-                            : 'N/A';
-                        final hasPaymentReport = charge['payment_image'] != null;
-                        final paymentImageUrl = charge['payment_image'] as String?;
-
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: ListTile(
-                            isThreeLine: feeDescription != null && feeDescription.isNotEmpty,
-                            title: Text('$feeName - Q$amount'),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (bankName != null)
-                                  Text('Banco: $bankName - Cta: $bankAccount', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                Text('Fecha de cargo: $chargeDate - Estado: $status'),
-                                if (feeDescription != null && feeDescription.isNotEmpty)
-                                  Text(feeDescription, style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
-                              ],
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (hasPaymentReport) ...[
-                                  const ElevatedButton(
-                                    onPressed: null, // Desactivado
-                                    child: Text('Reportado', style: TextStyle(fontSize: 12)),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  // Botón para cambiar el comprobante
-                                  SizedBox(
-                                    width: 130,
-                                    child: ElevatedButton.icon(
-                                      onPressed: () => _showReportPaymentDialog(charge),
-                                      icon: const Icon(Icons.edit, size: 14),
-                                      label: const Text(
-                                        'Cambiar Comprobante',
-                                        style: TextStyle(fontSize: 10),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ),
-                                  if (paymentImageUrl != null)
-                                    IconButton(
-                                      icon: const Icon(Icons.receipt_long),
-                                      tooltip: 'Ver Comprobante',
-                                      onPressed: () => _showPaymentImage(paymentImageUrl),
-                                    ),
-                                ] else if (status == 'pending')
-                                  SizedBox(
-                                    width: 130,
-                                    child: ElevatedButton(
-                                      onPressed: () => _showReportPaymentDialog(charge),
-                                      child: const Text('Reportar Pago', style: TextStyle(fontSize: 10)),
-                                    ),
-                                  ),
-                              ],
-                            ),
+      backgroundColor: Colors.transparent, // Mantenemos el fondo del Scaffold transparente
+      body: AppBackground(
+        child: Stack( // Usamos un Stack para superponer el título y el botón de atrás
+          children: [
+            // El contenido principal de la pantalla
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Column(
+                        children: [
+                          // Dejamos un espacio en la parte superior para el título y el botón
+                          const SizedBox(height: 80), 
+                          FilterStrip(
+                            options: const ['Pendientes', 'Historial'],
+                            selectedIndex: _selectedFilterIndex,
+                            onSelected: (index) {
+                              setState(() {
+                                _selectedFilterIndex = index;
+                              });
+                            },
                           ),
-                        );
-                      },
+                          const SizedBox(height: 16),
+                          Expanded(child: _buildFeeGrid()),
+                        ],
+                      ),
+              ),
+            ),
+            // Título y botón de atrás superpuestos
+            Positioned(
+              top: 40,
+              left: 16,
+              right: 16,
+              child: Row(
+                children: [
+                  IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
+                  Expanded(
+                    child: Text(
+                      'Estado de Cuenta y Pagos',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
+                  ),
+                  const SizedBox(width: 48), // Espacio para balancear el IconButton
+                ],
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFeeGrid() {
+    final filteredCharges = _selectedFilterIndex == 0
+        ? _feeCharges.where((c) => c['status'] == 'pending').toList()
+        : _feeCharges.where((c) => c['status'] != 'pending').toList();
+
+    if (filteredCharges.isEmpty) {
+      return Center(
+        child: Text(_selectedFilterIndex == 0
+            ? 'No tienes cuotas pendientes.'
+            : 'No hay historial de cuotas.'),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        int crossAxisCount = constraints.maxWidth > 600 ? 2 : 1;
+        return GridView.builder(
+          padding: const EdgeInsets.all(16.0),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: crossAxisCount == 2 ? 2.5 : 2.0,
+          ),
+          itemCount: filteredCharges.length,
+          itemBuilder: (context, index) {
+            final charge = filteredCharges[index];
+            return _buildFeeCard(charge);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildFeeCard(Map<String, dynamic> charge) {
+    final status = charge['status'] as String? ?? 'pending';
+    final feeName = charge['fee_name'] as String? ?? 'Cuota';
+    final amount = (charge['amount'] as num? ?? 0.0).toStringAsFixed(2);
+    final chargeDate = charge['charge_date'] != null
+        ? DateFormat('dd/MM/yyyy').format(DateTime.parse(charge['charge_date']))
+        : 'N/A';
+    final hasPaymentReport = charge['payment_image'] != null;
+    final paymentImageUrl = charge['payment_image'] as String?;
+
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  '$feeName - Q$amount',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              _buildStatusChip(status),
+            ],
+          ),
+          const Divider(height: 16),
+          Text('Fecha de cargo: $chargeDate'),
+          const Spacer(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (hasPaymentReport) ...[
+                if (paymentImageUrl != null)
+                  TextButton.icon(
+                    icon: const Icon(Icons.receipt_long, size: 16),
+                    label: const Text('Ver'),
+                    onPressed: () => _showPaymentImage(paymentImageUrl),
+                  ),
+                ElevatedButton.icon(
+                  // Desactivar el botón si el estado es 'paid'
+                  onPressed: status == 'paid' ? null : () => _showReportPaymentDialog(charge),
+                  icon: const Icon(Icons.edit, size: 16),
+                  label: const Text('Editar'),
+                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 12)),
+                ),
+              ] else if (status == 'pending')
+                ElevatedButton(
+                  onPressed: () => _showReportPaymentDialog(charge),
+                  child: const Text('Reportar Pago'),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(String status) {
+    Color color;
+    String label;
+    switch (status) {
+      case 'paid':
+        color = Colors.green.withOpacity(0.2);
+        label = 'Pagado';
+        break;
+      case 'overdue':
+        color = Colors.red.withOpacity(0.2);
+        label = 'Vencido';
+        break;
+      case 'pending':
+      default:
+        color = Colors.orange.withOpacity(0.2);
+        label = 'Pendiente';
+        break;
+    }
+    return Chip(
+      label: Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+      backgroundColor: color,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      visualDensity: VisualDensity.compact,
     );
   }
 }
@@ -362,105 +455,122 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.isEditing ? 'Editar Reporte de Pago' : 'Reportar Pago'),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Solo mostrar campos de fecha y banco si NO estamos editando
-              if (!widget.isEditing) ...[
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Fecha de Pago',
-                    border: OutlineInputBorder(),
-                    suffixIcon: Icon(Icons.calendar_today),
-                  ),
-                  readOnly: true,
-                  controller: TextEditingController(
-                    text: _paymentDate == null
-                        ? ''
-                        : DateFormat('dd/MM/yyyy').format(_paymentDate!),
-                  ),
-                  onTap: () async {
-                    final pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime.now(), // No se puede seleccionar una fecha futura
-                    );
-                    if (pickedDate != null) {
-                      setState(() {
-                        _paymentDate = pickedDate;
-                      });
-                    }
-                  },
-                  validator: (value) => _paymentDate == null ? 'La fecha es obligatoria' : null,
+    // Reemplazamos AlertDialog por un Dialog personalizado para aplicar el tema.
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: GlassCard(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.isEditing ? 'Editar Reporte de Pago' : 'Reportar Pago',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: _selectedBankId,
-                  decoration: const InputDecoration(labelText: 'Banco Destino', border: OutlineInputBorder()),
-                  items: _banks.map((bank) {
-                    final bankName = bank['bank_name'] ?? 'N/A';
-                    final accountNumber = bank['account_number'] ?? 'N/A';
-                    return DropdownMenuItem(
-                      value: bank['bank_id'] as String,
-                      child: Text('$bankName - $accountNumber'),
-                    );
-                  }).toList(),
-                  onChanged: (val) => setState(() => _selectedBankId = val),
-                  validator: (v) => v == null ? 'Debe seleccionar un banco' : null,
-                ),
-                const SizedBox(height: 16),
-              ],
-              Row(
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: _pickImage,
-                    icon: const Icon(Icons.attach_file),
-                    label: Text(widget.isEditing ? 'Cambiar Imagen' : 'Adjuntar Imagen'),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      _paymentImageName ?? 'Ningún archivo seleccionado',
-                      overflow: TextOverflow.ellipsis,
+                const SizedBox(height: 24),
+                // Solo mostrar campos de fecha y banco si NO estamos editando
+                if (!widget.isEditing) ...[
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Fecha de Pago',
+                      border: OutlineInputBorder(),
+                      suffixIcon: Icon(Icons.calendar_today),
                     ),
+                    readOnly: true,
+                    controller: TextEditingController(
+                      text: _paymentDate == null
+                          ? ''
+                          : DateFormat('dd/MM/yyyy').format(_paymentDate!),
+                    ),
+                    onTap: () async {
+                      final pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now(), // No se puede seleccionar una fecha futura
+                      );
+                      if (pickedDate != null) {
+                        setState(() {
+                          _paymentDate = pickedDate;
+                        });
+                      }
+                    },
+                    validator: (value) => _paymentDate == null ? 'La fecha es obligatoria' : null,
                   ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    isExpanded: true, // Evita el desbordamiento de texto largo.
+                    value: _selectedBankId,
+                    decoration: const InputDecoration(labelText: 'Banco Destino', border: OutlineInputBorder()),
+                    items: _banks.map((bank) {
+                      final bankName = bank['bank_name'] ?? 'N/A';
+                      final accountNumber = bank['account_number'] ?? 'N/A';
+                      return DropdownMenuItem(
+                        value: bank['bank_id'] as String,
+                        child: Text('$bankName - $accountNumber', overflow: TextOverflow.ellipsis),
+                      );
+                    }).toList(),
+                    onChanged: (val) => setState(() => _selectedBankId = val),
+                    validator: (v) => v == null ? 'Debe seleccionar un banco' : null,
+                  ),
+                  const SizedBox(height: 16),
                 ],
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _notesController,
-                decoration: const InputDecoration(
-                  labelText: 'Notas (Opcional)',
-                  border: OutlineInputBorder(),
+                Row(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _pickImage,
+                      icon: const Icon(Icons.attach_file),
+                      label: Text(widget.isEditing ? 'Cambiar Imagen' : 'Adjuntar Imagen'),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _paymentImageName ?? 'Ningún archivo seleccionado',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
-                maxLines: 2,
-              ),
-            ],
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _notesController,
+                  decoration: const InputDecoration(
+                    labelText: 'Notas (Opcional)',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                      child: const Text('Cancelar'),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: _isSubmitting ? null : _submitReport,
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          : Text(widget.isEditing ? 'Actualizar' : 'Enviar'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: _isSubmitting ? null : _submitReport,
-          child: _isSubmitting
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                )
-              : Text(widget.isEditing ? 'Actualizar Comprobante' : 'Enviar Reporte'),
-        ),
-      ],
     );
   }
 }

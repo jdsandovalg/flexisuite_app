@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations: # Paquete para las traducciones de los widgets nativos de Flutter
+    sdk: flutter
   supabase_flutter: ^2.5.8
   intl: ^0.20.2
   file_picker: ^10.3.3
@@ -48,3 +50,4 @@ flutter:
     - assets/logo.png
     - web/favicon.png
     - assets/logo_login.png # Añadimos el nuevo logo a los assets.
+    - assets/locales/ # Añadimos la carpeta de traducciones

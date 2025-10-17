@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "language": {
+      "nativeName": "Português"
+    }
+  },
+  "login": {
+    "email": "E-mail",
+    "password": "Senha",
+    "button": "Entrar",
+    "forgotPassword": "Esqueci minha senha",
+    "createUser": "Criar Usuário",
+    "selectOrgTitle": "Selecione sua Organização",
+    "unknownOrg": "Organização Desconhecida",
+    "cancelButton": "Cancelar",
+    "copyright": "© {year} Infosoft",
+    "validation.invalidEmail": "Por favor, insira um e-mail válido"
+  }
+}

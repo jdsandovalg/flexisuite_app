@@ -9,6 +9,8 @@ import 'package:flexisuite_shared/flexisuite_shared.dart'; // Importar para AppB
 import 'restricted_access_screen.dart'; // Importar la nueva pantalla de acceso restringido
 import '../services/log_service.dart'; // Importar el servicio de logs
 import 'log_viewer_screen.dart'; // Importar la pantalla de logs
+import 'package:provider/provider.dart'; // Importar Provider para acceder a I18n
+import '../providers/i18n_provider.dart'; // Importar nuestro I18nProvider
 import '../services/notification_service.dart'; // Importar nuestro nuevo servicio
 
 class LoginScreen extends StatefulWidget {
@@ -163,6 +165,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _showOrganizationSelector(List<Map<String, dynamic>> profiles) async {
+    // Obtenemos la instancia del provider para usarla en el diálogo
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     int? selectedIndex;
 
     // Ocultar el teclado si está abierto
@@ -183,11 +187,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Selecciona tu Organización', style: Theme.of(context).textTheme.titleLarge),
+                      Text(i18n.t('login.selectOrgTitle'), style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 16),
                       ...List.generate(profiles.length, (index) {
                         final profile = profiles[index];
-                        final orgName = profile['organization_name'] ?? 'Organización Desconocida';
+                        final orgName = profile['organization_name'] ?? i18n.t('login.unknownOrg');
                         final isSelected = selectedIndex == index;
 
                         return Padding(
@@ -218,7 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               foregroundColor: Theme.of(context).colorScheme.onSurface,
                             ),
                             onPressed: () => Navigator.of(dialogContext).pop(),
-                            child: const Text('Cancelar'),
+                            child: Text(i18n.t('login.cancelButton')),
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton(
@@ -228,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.of(dialogContext).pop();
                               _navigateToApp(selectedProfile);
                             },
-                            child: const Text('Ingresar'),
+                            child: Text(i18n.t('login.button')),
                           ),
                         ],
                       ),
@@ -245,6 +249,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final i18n = Provider.of<I18nProvider>(context);
     final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -280,10 +285,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextFormField(
                             controller: _emailController,
                             autofocus: true,
-                            decoration: const InputDecoration(labelText: 'Correo electrónico', contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16)),
+                            decoration: InputDecoration(labelText: i18n.t('login.email'), contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16)),
                             validator: (value) {
                               if (value == null || value.isEmpty || !value.contains('@')) {
-                                return 'Ingrese un correo válido';
+                                return i18n.t('login.validation.invalidEmail');
                               }
                               return null;
                             },
@@ -291,7 +296,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _passwordController,
-                            decoration: const InputDecoration(labelText: 'Contraseña', contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16)),
+                            decoration: InputDecoration(labelText: i18n.t('login.password'), contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16)),
                             obscureText: true,
                             onEditingComplete: _isLoading ? null : _login,
                           ),
@@ -305,7 +310,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               child: _isLoading
                                   ? const CircularProgressIndicator(color: Colors.white)
-                                  : const Text("Ingresar"),
+                                  : Text(i18n.t('login.button')),
                             ),
                           ),
                           const SizedBox(height: 16), // Reducimos el espacio
@@ -323,7 +328,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                   textStyle: theme.textTheme.bodySmall,
                                 ),
-                                child: const Text('Olvidé mi contraseña'),
+                                child: Text(i18n.t('login.forgotPassword')),
                               ),
                               ElevatedButton(
                                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpScreen())),
@@ -333,17 +338,28 @@ class _LoginScreenState extends State<LoginScreen> {
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                   textStyle: theme.textTheme.bodySmall,
                                 ),
-                                child: const Text('Crear Usuario'),
+                                child: Text(i18n.t('login.createUser')),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
-                          Text(
-                            '© ${DateTime.now().year} Infosoft',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                          const SizedBox(height: 20),
+                          // --- INICIO: Fila para Copyright y Selector de Idioma ---
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Row(
+                              children: [
+                                Text(
+                                  i18n.t('login.copyright').replaceAll('{year}', DateTime.now().year.toString()),
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                                      ),
+                                ),
+                                const Spacer(), // Empuja el selector a la derecha
+                                _buildLanguageSelector(i18n, theme),
+                              ],
                             ),
                           ),
+                          // --- FIN: Fila para Copyright y Selector de Idioma ---
                         ],
                       ),
                     ],
@@ -354,6 +370,33 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildLanguageSelector(I18nProvider i18n, ThemeData theme) {
+    final currentLangCode = i18n.locale.languageCode;
+    final currentLangName = i18n.getNativeLanguageName(currentLangCode);
+
+    return TextButton.icon(
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      icon: Icon(Icons.language, size: 16, color: theme.textTheme.bodySmall?.color?.withOpacity(0.7)),
+      label: Text(
+        '$currentLangName (${currentLangCode.toUpperCase()})',
+        style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.textTheme.bodySmall?.color?.withOpacity(0.9),
+            ),
+      ),
+      onPressed: () {
+        final supportedLocales = i18n.supportedLocales;
+        if (supportedLocales.length <= 1) return;
+
+        final currentIndex = supportedLocales.indexWhere((locale) => locale.languageCode == currentLangCode);
+        final nextIndex = (currentIndex + 1) % supportedLocales.length;
+        i18n.setLocale(supportedLocales[nextIndex]);
+      },
     );
   }
 }

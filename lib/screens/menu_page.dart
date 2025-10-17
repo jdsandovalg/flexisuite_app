@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:async'; // Importar para usar Timer
 import '../models/app_state.dart';
-import '../providers/theme_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase
+import 'package:intl/intl.dart'; // Importar para formatear fechas
 import 'package:flexisuite_shared/flexisuite_shared.dart'; // Importar para AnimatedMenu
 import 'profile_screen.dart';
 import 'token_form_page.dart';
@@ -12,7 +13,6 @@ import 'community_events_page.dart'; // Importar la nueva pantalla de eventos
 import 'settings_screen.dart'; // Importar la nueva pantalla de ajustes
 import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Importar para los iconos
 import '../services/log_service.dart'; // Importar el servicio de logs
-import 'package:provider/provider.dart';
 
 class MenuPage extends StatefulWidget {
   const MenuPage({super.key}); // No longer requires features in constructor
@@ -30,6 +30,13 @@ class _MenuPageState extends State<MenuPage> {
   Map<String, dynamic>? _selectedLockedFeature;
   // --- FIN: Estado para la superposición ---
   final LogService _logService = LogService(); // Instancia del servicio de logs
+  // --- INICIO: Estado para el carrusel de eventos ---
+  List<Map<String, dynamic>> _approvedEvents = [];
+  PageController? _pageController;
+  Timer? _carouselTimer;
+  int _carouselIntervalSeconds = 5; // Valor por defecto si no se encuentra el parámetro
+  int _currentPage = 0;
+  // --- FIN: Estado para el carrusel de eventos ---
 
   // Mapa estático y COMPLETO que traduce el 'icon_name' de la base de datos
   // al objeto IconData que Flutter necesita. Este es nuestro "traductor" oficial.
@@ -116,14 +123,49 @@ class _MenuPageState extends State<MenuPage> {
   @override
   void initState() {
     super.initState();
-    _fetchFeatures(); // Ahora solo llamamos a una función
+    _pageController = PageController()..addListener(() {
+      // Escuchamos los cambios de página para actualizar los indicadores
+      setState(() => _currentPage = _pageController?.page?.round() ?? 0);
+    });
+    _fetchFeatures().then((_) {
+      // Solo si las características se cargaron correctamente, buscamos los eventos.
+      if (!_hasError) {
+        _fetchApprovedEvents();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController?.dispose();
+    _carouselTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startCarouselTimer() {
+    _carouselTimer?.cancel(); // Cancelamos cualquier timer anterior
+    if (_approvedEvents.length > 1 && mounted) {
+      final totalPages = _approvedEvents.length + 1; // +1 por la página de bienvenida
+      _carouselTimer = Timer.periodic(Duration(seconds: _carouselIntervalSeconds), (timer) {
+        if (_pageController != null && _pageController!.hasClients) {
+          int nextPage = (_pageController!.page!.round() + 1) % totalPages;
+          _pageController!.animateToPage(
+            nextPage,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+          );
+        }
+      });
+    }
   }
 
   Future<void> _fetchFeatures() async {
-    if (mounted) setState(() {
+    if (mounted) {
+      setState(() {
       _isLoading = true;
       _hasError = false; // Reseteamos el error al reintentar
     });
+    }
 
     final user = AppState.currentUser;
     if (user == null) {
@@ -147,6 +189,16 @@ class _MenuPageState extends State<MenuPage> {
         setState(() {
           _features = List<Map<String, dynamic>>.from(response);
           AppState.userFeatures = _features; // Guardamos las características en el estado global.
+          // Buscamos el parámetro del intervalo del carrusel
+          final intervalFeature = _features.firstWhere(
+            (f) => f['feature_code'] == 'MAX_SECONDS_INTERVAL',
+            orElse: () => {},
+          );
+          final intervalValue = int.tryParse(intervalFeature['value']?.toString() ?? '');
+          if (intervalValue != null && intervalValue > 0) {
+            _carouselIntervalSeconds = intervalValue;
+            _logService.log('Intervalo del carrusel configurado a: $_carouselIntervalSeconds segundos.');
+          }
           _hasError = false;
           _isLoading = false;
         });
@@ -169,6 +221,165 @@ class _MenuPageState extends State<MenuPage> {
         });
       }
     }
+  }
+
+  Future<void> _fetchApprovedEvents() async {
+    try {
+      _logService.log('Llamando a RPC: manage_community_event con p_action: approved');
+      final user = AppState.currentUser;
+      if (user == null) return;
+
+      final response = await Supabase.instance.client.rpc(
+        'manage_community_event',
+        params: {
+          'p_action': 'approved',
+          'p_organization_id': user.organizationId,
+          'p_created_by': null, // Se envía null como lo requiere la firma
+        },
+      );
+
+      if (mounted) {
+        setState(() {
+          _approvedEvents = List<Map<String, dynamic>>.from(response);
+        });
+        _logService.log('Eventos aprobados recibidos: ${_approvedEvents.length}');
+        _startCarouselTimer(); // Iniciamos el timer si hay más de un evento
+      }
+    } catch (e) {
+      _logService.log('Error al cargar eventos aprobados: $e');
+      if (mounted) {
+        // No mostramos un error en pantalla para no ser intrusivos, solo lo logueamos.
+        // setState(() => _approvedEvents = []);
+      }
+    }
+    // No manejamos isLoading aquí para que la carga sea en segundo plano.
+  }
+
+  Widget _buildApprovedEventCard(Map<String, dynamic> event) {
+    final theme = Theme.of(context);
+    final title = event['title'] as String? ?? 'Evento sin título';
+    final imageUrl = event['location_image'] as String?;
+    final startDateTime = event['start_datetime'] != null ? DateTime.parse(event['start_datetime']) : null;
+    final endDateTime = event['end_datetime'] != null ? DateTime.parse(event['end_datetime']) : null;
+
+    final dateStr = startDateTime != null
+        ? DateFormat('dd MMM, yyyy', 'es_ES').format(startDateTime)
+        : 'Fecha no disponible';
+    final startTimeStr = startDateTime != null ? DateFormat('HH:mm', 'es_ES').format(startDateTime) : '--:--';
+    final endTimeStr = endDateTime != null ? DateFormat('HH:mm', 'es_ES').format(endDateTime) : '--:--';
+
+    return GlassCard(
+      margin: const EdgeInsets.symmetric(horizontal: 8.0), // Margen para espaciar las tarjetas en la lista
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (imageUrl != null)
+            Expanded(
+              flex: 3, // Dar más espacio a la imagen
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                child: Image.network(
+                  imageUrl,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 40)),
+                ),
+              ),
+            ),
+          Expanded(
+            flex: 2, // Espacio para el texto
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today_outlined, size: 14, color: theme.textTheme.bodySmall?.color),
+                      const SizedBox(width: 6),
+                      Text(dateStr, style: theme.textTheme.bodySmall),
+                      const Spacer(), // Empuja el texto de la hora hacia la derecha
+                      Text('$startTimeStr - $endTimeStr hrs', style: theme.textTheme.bodySmall),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Renombrado para reflejar que ahora es un carrusel de información general
+  Widget _buildInfoCarousel() {
+    // El número total de páginas es la página de bienvenida + los eventos.
+    final totalPages = _approvedEvents.length + 1;
+
+    return SizedBox(
+      height: 240, // Aumentamos ligeramente la altura para dar espacio a los indicadores
+      child: Column(
+        children: [
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: totalPages,
+              itemBuilder: (context, index) {
+                // Si es la primera página, muestra la bienvenida.
+                if (index == 0) {
+                  return _buildWelcomePage();
+                }
+                // Para las demás páginas, muestra las tarjetas de eventos.
+                // Se resta 1 al índice porque la lista de eventos no incluye la bienvenida.
+                return _buildApprovedEventCard(_approvedEvents[index - 1]);
+              },
+            ),
+          ),
+          // Mostramos los indicadores solo si hay más de una página en total.
+          if (totalPages > 1) ...[
+            const SizedBox(height: 12), // Reducimos el espaciado para corregir el overflow
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(totalPages, (index) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                  height: 8.0,
+                  // El indicador activo es más ancho.
+                  width: _currentPage == index ? 24.0 : 8.0,
+                  decoration: BoxDecoration(
+                    // El indicador activo es más opaco.
+                    color: Theme.of(context).colorScheme.primary.withOpacity(_currentPage == index ? 0.9 : 0.4),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                );
+              }),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWelcomePage() {
+    return GlassCard(
+      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Image.asset('assets/logo.png', height: 80),
+          const SizedBox(height: 24),
+          const Text(
+            'Bienvenido',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
   }
 
   // Mapa de rutas para una navegación más limpia y escalable.
@@ -278,17 +489,9 @@ class _MenuPageState extends State<MenuPage> {
 
   Widget _buildMenu() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset('assets/logo.png', height: 80),
-          const SizedBox(height: 24),
-          const Text(
-            'Bienvenido',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
+      // CORRECCIÓN: Reemplazamos la columna por una llamada al nuevo carrusel unificado.
+      // La lógica de bienvenida ahora vivirá dentro de este carrusel.
+      child: _buildInfoCarousel(),
     );
   }
 

@@ -1,8 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'dart:convert'; // Importar la librería para JSON
+// Importar la librería para JSON
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:intl/intl.dart';
 import '../models/app_state.dart';
 import 'package:flexisuite_shared/flexisuite_shared.dart'; // Importar el paquete compartido
 import '../widgets/profile_photo_picker.dart';

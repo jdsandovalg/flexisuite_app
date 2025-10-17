@@ -1,9 +1,6 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:csv/csv.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -15,7 +12,7 @@ import '../services/log_service.dart';
 import '../widgets/guest_list_modal.dart'; // Importar el nuevo modal
 
 class TokenFormPage extends StatefulWidget {
-  const TokenFormPage({Key? key}) : super(key: key);
+  const TokenFormPage({super.key});
 
   @override
   _TokenFormPageState createState() => _TokenFormPageState();
@@ -92,7 +89,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
       }
 
       setState(() {
-        _tokens = response as List<dynamic>;
+        _tokens = response;
         _isLoading = false;
       });
     } catch (error) {
@@ -202,8 +199,10 @@ class _TokenFormPageState extends State<TokenFormPage> {
         // --- FIN: Lógica de reseteo ---
       } catch (e) {
         _logService.log('Error al guardar el token: $e');
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: SelectableText('Error al guardar el token: $e')));
+        }
       }
     }
   }
@@ -377,10 +376,10 @@ class _TokenFormPageState extends State<TokenFormPage> {
 
     if (token['is_recurring'] == true) {
       startDate = token['recurring_start_date'] != null
-          ? DateFormat('dd/MM/yy').format(DateTime.parse(token['recurring_start_date'])) + ' ${token['daily_start'] ?? ''}'
+          ? '${DateFormat('dd/MM/yy').format(DateTime.parse(token['recurring_start_date']))} ${token['daily_start'] ?? ''}'
           : 'N/A';
       endDate = token['recurring_end_date'] != null
-          ? DateFormat('dd/MM/yy').format(DateTime.parse(token['recurring_end_date'])) + ' ${token['daily_end'] ?? ''}'
+          ? '${DateFormat('dd/MM/yy').format(DateTime.parse(token['recurring_end_date']))} ${token['daily_end'] ?? ''}'
           : 'N/A';
     } else if (token['created_at'] != null) {
       final startDateTime = DateTime.parse(token['created_at'] as String);

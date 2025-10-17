@@ -196,9 +196,11 @@ class _GuestListModalState extends State<GuestListModal> {
         });
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al procesar el archivo CSV: $e')),
       );
+      }
     }
   }
 }

@@ -7,7 +7,7 @@ import '../models/app_state.dart';
 import 'package:file_picker/file_picker.dart';
 
 class FeePaymentReportPage extends StatefulWidget {
-  const FeePaymentReportPage({Key? key}) : super(key: key);
+  const FeePaymentReportPage({super.key});
 
   @override
   _FeePaymentReportPageState createState() => _FeePaymentReportPageState();
@@ -283,11 +283,11 @@ class ReportPaymentDialog extends StatefulWidget {
   final bool isEditing;
 
   const ReportPaymentDialog({
-    Key? key,
+    super.key,
     required this.charge,
     required this.onReported,
     this.isEditing = false,
-  }) : super(key: key);
+  });
 
   @override
   _ReportPaymentDialogState createState() => _ReportPaymentDialogState();
@@ -391,7 +391,7 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
 
         // 2. Sube la nueva imagen.
         final fileExt = _paymentImageName!.split('.').last;
-        final filePath = 'payment_proofs/${user.id}/${chargeId}.$fileExt';
+        final filePath = 'payment_proofs/${user.id}/$chargeId.$fileExt';
       
       try {
         await Supabase.instance.client.storage.from('payment_proofs').uploadBinary(
@@ -505,7 +505,7 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     isExpanded: true, // Evita el desbordamiento de texto largo.
-                    value: _selectedBankId,
+                    initialValue: _selectedBankId,
                     decoration: const InputDecoration(labelText: 'Banco Destino', border: OutlineInputBorder()),
                     items: _banks.map((bank) {
                       final bankName = bank['bank_name'] ?? 'N/A';

@@ -15,7 +15,7 @@ class AppBackground extends StatelessWidget {
     // Ahora el gradiente se basa en los colores del tema actual.
     final gradient = LinearGradient(
       colors: [
-        theme.colorScheme.background,
+        theme.colorScheme.surface,
         theme.colorScheme.surface, // Usamos el color de superficie para crear un gradiente sutil.
       ],
       begin: Alignment.topLeft,

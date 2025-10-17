@@ -43,3 +43,34 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode / iOS cleanup
+DerivedData/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Generated.xcconfig
+ios/Runner.xcworkspace/
+*.xcuserstate
+*.xcuserdatad
+*.xcworkspace
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+
+# Simulator data
+Library/Developer/CoreSimulator/
+simulator_logs/
+
+# Personal maintenance scripts (local only)
+clean_ios.sh
+reset_simulator.sh
+
+
+

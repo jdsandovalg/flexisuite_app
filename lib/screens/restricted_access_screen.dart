@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/app_state.dart';
 
 class RestrictedAccessScreen extends StatelessWidget {
   final String userName;

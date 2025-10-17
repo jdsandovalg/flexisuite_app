@@ -9,6 +9,7 @@ import 'package:flexisuite_shared/flexisuite_shared.dart'; // Importar para AppB
 import 'restricted_access_screen.dart'; // Importar la nueva pantalla de acceso restringido
 import '../services/log_service.dart'; // Importar el servicio de logs
 import 'log_viewer_screen.dart'; // Importar la pantalla de logs
+import '../services/notification_service.dart'; // Importar nuestro nuevo servicio
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -62,10 +63,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
           if (profiles.isEmpty) {
             _logService.log('Error: Login exitoso pero sin perfiles de organización.');
-            AppDialogs.showErrorDialog(context, 'No tienes asignada ninguna organización.');
+            NotificationService.showWarning('No tienes asignada ninguna organización.');
           } else if (profiles.length == 1) {
             // Caso 1: Solo una organización, procedemos como antes.
             _logService.log('Login exitoso con un solo perfil.');
+            // Mostramos el mensaje de éxito ANTES de navegar
+            NotificationService.showSuccess('Acceso Correcto');
             _navigateToApp(profiles.first);
           } else {
             // Caso 2: Múltiples organizaciones, mostramos el selector.
@@ -74,13 +77,13 @@ class _LoginScreenState extends State<LoginScreen> {
           }
         } else {
           _logService.log('Fallo el login: ${data['message']?.toString()}');
-          AppDialogs.showErrorDialog(context, data['message']?.toString() ?? 'Error desconocido');
+          NotificationService.showError(data['message']?.toString() ?? 'Error desconocido');
         }
       }
     } catch (error) {
       _logService.log('Excepción capturada durante el login: ${error.toString()}');
       if (mounted) {
-        AppDialogs.showErrorDialog(context, error.toString(), title: 'Error inesperado');
+        NotificationService.showError("Error inesperado: ${error.toString()}");
       }
     } finally {
       if (mounted) {

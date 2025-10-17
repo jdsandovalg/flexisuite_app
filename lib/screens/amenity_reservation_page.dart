@@ -8,7 +8,7 @@ import '../services/log_service.dart'; // Importar el servicio de logs
 import '../models/amenity_model.dart';
 
 class AmenityReservationPage extends StatefulWidget {
-  const AmenityReservationPage({Key? key}) : super(key: key);
+  const AmenityReservationPage({super.key});
 
   @override
   _AmenityReservationPageState createState() => _AmenityReservationPageState();
@@ -854,7 +854,7 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
     return DropdownButtonFormField<String>(
       isExpanded: true, // Evita el desbordamiento de texto largo.
       // --- INICIO: Lógica mejorada para el valor y el hint ---
-      value: _userProperties.any((p) => p['location_id'] == _selectedLocationId)
+      initialValue: _userProperties.any((p) => p['location_id'] == _selectedLocationId)
           ? _selectedLocationId
           : null,
       hint: _userProperties.isEmpty
@@ -911,7 +911,7 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
               '• $start - $end ($status)',
               style: theme.textTheme.bodyMedium?.copyWith(color: res['status'] == 'confirmed' ? theme.colorScheme.error : theme.colorScheme.secondary),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

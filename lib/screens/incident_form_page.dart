@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dart:convert';
 import 'package:intl/intl.dart';
 import '../models/app_state.dart';
 import 'package:flexisuite_shared/flexisuite_shared.dart';
@@ -9,7 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../widgets/location_tree_dialog.dart';
 
 class IncidentFormPage extends StatefulWidget {
-  const IncidentFormPage({Key? key}) : super(key: key);
+  const IncidentFormPage({super.key});
 
   @override
   _IncidentFormPageState createState() => _IncidentFormPageState();
@@ -208,7 +207,7 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
           'p_latitude': _useGps && _currentPosition != null ? _currentPosition!.latitude : null,
           'p_longitude': _useGps && _currentPosition != null ? _currentPosition!.longitude : null,
           'p_location_accuracy_m': _useGps && _currentPosition != null ? _currentPosition!.accuracy.round() : null,
-          'p_location_timestamp': _useGps && _currentPosition != null ? _currentPosition!.timestamp?.toIso8601String() : null,
+          'p_location_timestamp': _useGps && _currentPosition != null ? _currentPosition!.timestamp.toIso8601String() : null,
           // El provider no lo estamos capturando por ahora, pero la BD lo soporta.
           'p_location_provider': null,
           // --- FIN: Añadir datos de GPS ---
@@ -412,7 +411,7 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
                               // --- FIN: Campo de Ubicación Mejorado ---
                               const SizedBox(height: 16),
                               DropdownButtonFormField<String>(
-                                value: _selectedAdminId,
+                                initialValue: _selectedAdminId,
                                 decoration: const InputDecoration(labelText: 'Asignar a (Opcional)'),
                                 items: _admins.map((admin) {
                                   return DropdownMenuItem(

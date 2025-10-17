@@ -23,10 +23,12 @@ dependencies:
   shared_preferences: ^2.2.3
   timezone: ^0.10.1 # Para manejo de zonas horarias
   flutter_native_timezone: ^2.0.0 # Para obtener la zona horaria nativa
+  fluttertoast: ^8.2.6 # Para notificaciones tipo "toast"
   csv: ^6.0.0 # Para parsear archivos CSV
   geolocator: ^14.0.2
   permission_handler: ^12.0.1
   table_calendar: ^3.2.0
+  image_picker: ^1.2.0
 
 dev_dependencies:
   flutter_test:

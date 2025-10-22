@@ -14,7 +14,10 @@
     "unknownOrg": "Organización Desconocida",
     "cancelButton": "Cancelar",
     "copyright": "© {year} Infosoft",
-    "validation.invalidEmail": "Ingrese un correo válido"
+    "validation.invalidEmail": "Ingrese un correo válido",
+    "noOrganizationAssigned": "No tienes asignada ninguna organización.",
+    "loginSuccess": "Acceso Correcto",
+    "unknownError": "Error desconocido"
   },
   "tokenForm": {
     "title": "Crear Tokens de Acceso",

@@ -14,7 +14,10 @@
     "unknownOrg": "Organisation inconnue",
     "cancelButton": "Annuler",
     "copyright": "© {year} Infosoft",
-    "validation.invalidEmail": "Veuillez entrer un e-mail valide"
+    "validation.invalidEmail": "Veuillez entrer un e-mail valide",
+    "noOrganizationAssigned": "Vous n'avez aucune organisation assignée.",
+    "loginSuccess": "Accès réussi",
+    "unknownError": "Erreur inconnue"
   },
   "tokenForm": {
     "title": "Créer des jetons d'accès",

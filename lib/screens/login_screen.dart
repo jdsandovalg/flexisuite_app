@@ -35,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -64,12 +65,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
           if (profiles.isEmpty) {
             _logService.log('Error: Login exitoso pero sin perfiles de organización.');
-            NotificationService.showWarning('No tienes asignada ninguna organización.');
+            NotificationService.showWarning(i18n.t('login.noOrganizationAssigned'));
           } else if (profiles.length == 1) {
             // Caso 1: Solo una organización, procedemos como antes.
             _logService.log('Login exitoso con un solo perfil.');
             // Mostramos el mensaje de éxito ANTES de navegar
-            NotificationService.showSuccess('Acceso Correcto');
+            NotificationService.showSuccess(i18n.t('login.loginSuccess'));
             _navigateToApp(profiles.first);
           } else {
             // Caso 2: Múltiples organizaciones, mostramos el selector.
@@ -77,8 +78,8 @@ class _LoginScreenState extends State<LoginScreen> {
             await _showOrganizationSelector(profiles);
           }
         } else {
-          _logService.log('Fallo el login: ${data['message']?.toString()}');
-          NotificationService.showError(data['message']?.toString() ?? 'Error desconocido');
+          _logService.log('Fallo el login: ${data['message']?.toString() ?? i18n.t('login.unknownError')}');
+          NotificationService.showError(data['message']?.toString() ?? i18n.t('login.unknownError'));
         }
       }
     } catch (error) {

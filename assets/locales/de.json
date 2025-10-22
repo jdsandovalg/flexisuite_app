@@ -1,0 +1,358 @@
+{
+  "_meta": {
+    "language": {
+      "nativeName": "Deutsch"
+    }
+  },
+  "login": {
+    "email": "E-Mail",
+    "password": "Passwort",
+    "button": "Anmelden",
+    "forgotPassword": "Passwort vergessen",
+    "createUser": "Benutzer erstellen",
+    "selectOrgTitle": "Wählen Sie Ihre Organisation",
+    "unknownOrg": "Unbekannte Organisation",
+    "cancelButton": "Abbrechen",
+    "copyright": "© {year} Infosoft",
+    "validation.invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+    "noOrganizationAssigned": "Ihnen ist keine Organisation zugewiesen.",
+    "loginSuccess": "Anmeldung erfolgreich",
+    "unknownError": "Unbekannter Fehler"
+  },
+  "tokenForm": {
+    "title": "Zugangstoken erstellen",
+    "tokenTypes": {
+      "individual": "Individuell",
+      "services": "Dienste",
+      "recurrent": "Wiederkehrend",
+      "events": "Veranstaltungen"
+    },
+    "validityLabel": "Gültigkeit",
+    "validityHours": "{hours} Stunden",
+    "form": {
+      "guestName": "Name des Gastes",
+      "cui": "CUI (ID)",
+      "contactName": "Kontaktname",
+      "startDate": "Startdatum",
+      "endDate": "Enddatum",
+      "startTime": "Startzeit",
+      "endTime": "Endzeit",
+      "eventName": "Veranstaltungsname",
+      "eventDate": "Veranstaltungsdatum",
+      "addGuests": "Gäste hinzufügen",
+      "viewEditGuests": "Liste ansehen/bearbeiten ({count} Gäste)",
+      "requiredField": "Erforderlich"
+    },
+    "buttons": {
+      "save": "Token speichern",
+      "close": "Schließen"
+    },
+    "messages": {
+      "qrTitle": "Token-QR",
+      "copied": "Token in die Zwischenablage kopiert",
+      "authError": "Fehler: Benutzer nicht authentifiziert",
+      "saveSuccess": "Token für \"{name}\" erfolgreich gespeichert.",
+      "saveError": "Fehler beim Speichern des Tokens: {error}"
+    },
+    "filters": {
+      "current": "Aktuell",
+      "history": "Verlauf"
+    },
+    "empty": {
+      "current": "Sie haben keine aktuellen Token.",
+      "history": "Es gibt keinen Token-Verlauf."
+    },
+    "serviceCategories": {
+      "telephony": "Telefonie",
+      "utilities": "Energie/Wasser"
+    },
+    "status": {
+      "active": "Aktiv",
+      "expiring": "Läuft ab",
+      "expired": "Abgelaufen",
+      "used_revoked": "Benutzt/Widerrufen"
+    }
+  },
+  "menu": {
+    "moreOptions": "Mehr Optionen",
+    "editProfile": "Profil bearbeiten",
+    "settings": "Einstellungen",
+    "logout": "Abmelden",
+    "language": "Sprache",
+    "welcome": "Willkommen",
+    "dateNotAvailable": "Datum nicht verfügbar",
+    "eventWithoutTitle": "Veranstaltung ohne Titel",
+    "criticalMenuLoadError": "Kritischer Fehler beim Laden des Menüs: {error}",
+    "loadingMenu": "Menü wird geladen...",
+    "menuLoadFailed": "Menü konnte nicht geladen werden",
+    "retry": "Wiederholen",
+    "featureNotImplemented": "Funktion \"{featureName}\" nicht implementiert.",
+    "lockedFeatureTitle": "Funktion gesperrt",
+    "lockedFeatureBody": "Diese Funktion ist in Ihrem aktuellen Plan nicht verfügbar. Kontaktieren Sie den Support für weitere Informationen.",
+    "lockedFeatureCta": "Jetzt freischalten!",
+    "noUpcomingPublicEvents": "Keine bevorstehenden öffentlichen Veranstaltungen.",
+    "noEventsCreatedYet": "Sie haben noch keine Veranstaltungen erstellt.",
+    "confirmLogoutTitle": "Abmeldung bestätigen",
+    "confirmLogoutMessage": "Möchten Sie sich wirklich abmelden?",
+    "yesLogout": "Ja, abmelden",
+    "no": "Nein",
+    "selectLanguage": "Sprache auswählen",
+    "more": "Mehr",
+    "features": {
+      "cuota_reportar_pago": "Zahlungen",
+      "Hall_Reservations": "Buchungen",
+      "notifications": "Nachrichten",
+      "token_create_simple": "Zugang",
+      "Community_Events": "Events",
+      "ticket_create": "Vorfälle"
+    }
+  },
+  "profileScreen": {
+    "title": "Profil bearbeiten",
+    "personalInfo": "Persönliche Informationen",
+    "residenceInfo": "Wohnsitzinformationen",
+    "securityPrivacy": "Sicherheit & Datenschutz",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "email": "E-Mail",
+    "birthDate": "Geburtsdatum",
+    "phone": "Telefon",
+    "bio": "Biografie",
+    "condo": "Wohnanlage",
+    "floor": "Etage",
+    "unitNumber": "Einheit/Hausnummer",
+    "newPassword": "Neues Passwort (leer lassen, um es nicht zu ändern)",
+    "newPasswordHelper": "Mindestens 8 Zeichen, 1 Großbuchstabe, 1 Kleinbuchstabe, 1 Zahl und 1 Symbol (!@#$&*~).",
+    "confirmPassword": "Neues Passwort bestätigen",
+    "privateAccount": "Privates Konto",
+    "chatNotifications": "Chat-Benachrichtigungen erhalten",
+    "cancel": "Abbrechen",
+    "save": "Änderungen speichern",
+    "requiredField": "Dieses Feld ist erforderlich",
+    "passwordMismatch": "Die Passwörter stimmen nicht überein",
+    "passwordRequirements": "Das Passwort erfüllt die Anforderungen nicht.",
+    "locationNotFound": "Standort nicht gefunden",
+    "errorLoadingLocation": "Fehler beim Abrufen des Standorts",
+    "tabs": {
+      "profile": "Profil",
+      "cards": "Meine Karten",
+      "fees": "Meine Gebühren"
+    },
+    "cards": {
+      "noCards": "Ihnen sind keine Zugangskarten zugewiesen.",
+      "vehicular": "Fahrzeug",
+      "pedestrian": "Fußgänger",
+      "status": "Status",
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
+    },
+    "fees": {
+      "noFees": "Ihnen sind keine Gebühren zugewiesen.",
+      "current": "Gültig",
+      "notCurrent": "Ungültig"
+    },
+    "messages": {
+      "loadError": "Fehler beim Laden der Anfangsdaten: {error}",
+      "uploadError": "Fehler beim Hochladen des Fotos: {error}",
+      "saveSuccess": "Profil erfolgreich aktualisiert.",
+      "saveError": "Fehler beim Speichern des Profils: {error}"
+    }
+  },
+  "incidentForm": {
+    "title": "Vorfall erstellen",
+    "descriptionLabel": "Beschreibung des Vorfalls",
+    "descriptionRequired": "Beschreibung ist erforderlich",
+    "priorityLabel": "Priorität",
+    "departmentLabel": "Abteilung",
+    "useGpsLabel": "Meinen GPS-Standort anhängen",
+    "gpsCoordinates": "Lat: {lat}, Lon: {lon}",
+    "locationLabel": "Ort des Vorfalls",
+    "locationHint": "Ort auswählen...",
+    "locationRequired": "Ort ist erforderlich",
+    "assignToLabel": "Zuweisen an (Optional)",
+    "createButton": "Ticket erstellen",
+    "priorities": {
+      "low": "Niedrig",
+      "medium": "Mittel",
+      "high": "Hoch"
+    },
+    "departments": {
+      "security": "Sicherheit",
+      "maintenance": "Wartung",
+      "ornament": "Dekoration",
+      "other": "Andere"
+    },
+    "filters": {
+      "open": "Offen",
+      "in_progress": "In Bearbeitung",
+      "history": "Verlauf"
+    },
+    "empty": {
+      "open": "Keine offenen Tickets.",
+      "in_progress": "Keine Tickets in Bearbeitung.",
+      "history": "Kein Ticketverlauf."
+    },
+    "card": {
+      "noCode": "O.C.",
+      "noDescription": "Ohne Beschreibung",
+      "location": "Ort",
+      "noLocation": "Nicht angegeben",
+      "created": "Erstellt am"
+    },
+    "messages": {
+      "loadError": "Fehler beim Laden der Anfangsdaten: {error}",
+      "createSuccess": "Ticket erfolgreich erstellt.",
+      "createError": "Fehler beim Erstellen des Tickets: {error}",
+      "permissionDenied": "Standortberechtigung verweigert.",
+      "gpsDisabled": "Bitte aktivieren Sie GPS auf Ihrem Gerät."
+    }
+  },
+  "feePaymentReport": {
+    "title": "Kontoauszug & Zahlungen",
+    "filters": {
+      "pending": "Ausstehend",
+      "history": "Verlauf"
+    },
+    "empty": {
+      "pending": "Sie haben keine ausstehenden Gebühren.",
+      "history": "Es gibt keinen Gebührenverlauf."
+    },
+    "card": {
+      "feeName": "Gebühr",
+      "chargeDate": "Datum der Belastung",
+      "buttons": {
+        "view": "Ansehen",
+        "edit": "Bearbeiten",
+        "reportPayment": "Zahlung melden"
+      }
+    },
+    "status": {
+      "paid": "Bezahlt",
+      "overdue": "Überfällig",
+      "pending": "Ausstehend"
+    },
+    "dialog": {
+      "title": {
+        "report": "Zahlung melden",
+        "edit": "Zahlungsbericht bearbeiten"
+      },
+      "paymentDate": "Zahlungsdatum",
+      "destinationBank": "Zielbank",
+      "attachImage": "Bild anhängen",
+      "changeImage": "Bild ändern",
+      "noFileSelected": "Keine Datei ausgewählt",
+      "notes": "Notizen (Optional)",
+      "cancel": "Abbrechen",
+      "update": "Aktualisieren",
+      "send": "Senden",
+      "dateRequired": "Datum ist erforderlich",
+      "bankRequired": "Sie müssen eine Bank auswählen",
+      "imageRequired": "Sie müssen ein Bild des Zahlungsbelegs anhängen."
+    },
+    "imageDialog": {
+      "title": "Zahlungsbeleg",
+      "close": "Schließen",
+      "loadError": "Das Bild konnte nicht geladen werden."
+    },
+    "messages": {
+      "loadError": "Fehler beim Laden der Gebühren: {error}",
+      "imageSelectError": "Fehler bei der Bildauswahl: {error}",
+      "reportSuccess": "Ihr Zahlungsbeleg wurde gesendet. Die Verwaltung wird Ihre Zahlung überprüfen.",
+      "reportError": "Fehler beim Senden des Berichts: {error}"
+    }
+  },
+  "amenityReservation": {
+    "title": "Einrichtung buchen",
+    "tabs": {
+      "book": "Buchen",
+      "myReservations": "Meine Buchungen"
+    },
+    "noAmenities": "Keine Einrichtungen verfügbar.",
+    "noReservations": "Sie haben keine Buchungen.",
+    "amenityCard": {
+      "includedHours": "Inkludierte Stunden",
+      "capacity": "Kapazität",
+      "extraHourPrice": "Preis pro Extrastunde"
+    },
+    "reservationForm": {
+      "acceptTerms": "Ich akzeptiere die Bedingungen der Hausordnung",
+      "step1Title": "1. Datum und Uhrzeit auswählen",
+      "step2Title": "2. Details vervollständigen",
+      "timePickerStart": "Start",
+      "timePickerEnd": "Ende",
+      "timePickerChoose": "Wählen",
+      "nextButton": "Weiter",
+      "backButton": "Zurück",
+      "confirmButton": "Buchung bestätigen",
+      "eventNameLabel": "Veranstaltungsname",
+      "propertyLabel": "Gebühr der Immobilie zuweisen",
+      "propertyHint": "Wählen Sie eine Immobilie",
+      "loadingProperties": "Lade Immobilien...",
+      "noProperties": "Keine Immobilien zur Auswahl.",
+      "propertyRequired": "Sie müssen eine Immobilie auswählen.",
+      "eventNameRequired": "Erforderlich"
+    },
+    "costSummary": {
+      "title": "Kostenübersicht",
+      "reservedHours": "Reservierte Stunden",
+      "includedHours": "Inkludierte Stunden",
+      "extraHours": "Extrastunden",
+      "total": "Gesamtbetrag"
+    },
+    "bookedHours": {
+      "title": "Gebuchte Zeiten für diesen Tag:",
+      "confirmed": "Bestätigt",
+      "pending": "Ausstehend"
+    },
+    "myReservationsCard": {
+      "noName": "Ohne Namen",
+      "unknownAmenity": "Unbekannte Einrichtung",
+      "amenity": "Einrichtung",
+      "date": "Datum",
+      "totalCost": "Gesamtkosten",
+      "cancelButton": "Stornieren"
+    },
+    "cancelDialog": {
+      "title": "Stornierung bestätigen",
+      "content": "Sind Sie sicher, dass Sie diese Buchung stornieren möchten?",
+      "confirm": "Ja, stornieren",
+      "deny": "Nein"
+    },
+    "messages": {
+      "loadAmenitiesError": "Fehler beim Laden der Einrichtungen: {error}",
+      "loadPropertiesError": "Fehler beim Laden der Benutzereigenschaften: {error}",
+      "loadReservationsError": "Fehler beim Laden meiner Buchungen: {error}",
+      "loadBookedDatesError": "Fehler beim Laden der gebuchten Daten: {error}",
+      "cancelSuccess": "Buchung storniert.",
+      "cancelError": "Fehler beim Stornieren der Buchung: {error}",
+      "createSuccess": "Buchung erfolgreich erstellt! Die entsprechende Gebühr wurde generiert.",
+      "createError": "Fehler beim Erstellen der Buchung: {error}",
+      "invalidTimeRange": "Die Endzeit darf nicht vor der Startzeit liegen.",
+      "invalidStartTime": "Die Startzeit darf nicht vor {time} liegen.",
+      "invalidEndTime": "Die Endzeit darf nicht nach {time} liegen.",
+      "fillAllFields": "Bitte füllen Sie alle Felder aus."
+    },
+    "status": {
+      "confirmed": "Bestätigt",
+      "cancelled": "Storniert",
+      "pending": "Ausstehend"
+    }
+  },
+  "lockedFeatures": {
+    "Hall_Reservations": {
+      "title": "✨ Ihr Event, Ihr Raum, Ihre App",
+      "body": "Stellen Sie sich vor, Sie buchen den Saal für Ihren Geburtstag oder den Pool für ein Familientreffen und geben Ihren Gästen ein einzigartiges, spezielles Token, das ihnen die Türen öffnet. Kein Papierkram, keine Komplikationen: alles über die App, mit intelligentem und organisiertem Zugang. Ein exklusiver Vorteil unserer Premium-Pläne.",
+      "cta": "🔑 Ich möchte diesen Vorteil"
+    },
+    "notifications": {
+      "title": "🔔 Ihre Gemeinschaft, immer wachsam",
+      "body": "Erhalten Sie wichtige Sicherheitswarnungen, Vorfälle und Erinnerungen für Ihre Residenz sofort. Bleiben Sie informiert und handeln Sie rechtzeitig, um Ihr Zuhause und Ihre Familie zu schützen. Jede Warnung enthält eine Schaltfläche für den schnellen Zugriff auf Informationen und die aktive Teilnahme an Ihrer Gemeinschaft. Alles mit einem Fingertipp, um auf Details zuzugreifen und sofort Maßnahmen zu ergreifen.",
+      "cta": "⚡ Benachrichtigungen prüfen"
+    },
+    "Community_Events": {
+      "title": "✨ Machen Sie Ihre Events organisiert und unvergesslich!",
+      "body": "Community-Events ermöglichen es Ihnen, Aktivitäten innerhalb des Wohngebiets zu planen und zu koordinieren, wie z. B. gesellschaftliche Zusammenkünfte, religiöse Prozessionen, Sportturniere oder kulturelle Veranstaltungen.\nWeisen Sie Nachbarn Rollen als Koordinatoren zu, kontrollieren Sie die Anwesenheit externer Gäste mit sicheren digitalen Token und verfolgen Sie alles von Ihrem Dashboard aus in Echtzeit: Daten, Zeiten, Orte und Teilnehmer.\nDie Organisation Ihrer Aktivitäten war noch nie so einfach und sicher, und jedes Event kann zu einem unvergesslichen Erlebnis für alle Nachbarn werden.",
+      "cta": "🔑 Entdecken Sie, wie Sie mit der Planung beginnen können!"
+    }
+  }
+}

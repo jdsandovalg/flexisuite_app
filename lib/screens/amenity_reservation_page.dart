@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:flexisuite_shared/flexisuite_shared.dart';
+import 'package:provider/provider.dart';
 import '../models/app_state.dart';
 import 'package:table_calendar/table_calendar.dart'; // Importamos el nuevo paquete de calendario
 import '../services/log_service.dart'; // Importar el servicio de logs
 import '../models/amenity_model.dart';
+import '../providers/i18n_provider.dart';
+import '../services/notification_service.dart';
 
 class AmenityReservationPage extends StatefulWidget {
   const AmenityReservationPage({super.key});
@@ -32,7 +35,7 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
   // --- FIN: Estado para el wizard de reserva ---
 
   // Estado de la selección
-  Amenity? _selectedAmenity;
+  Amenity? _selectedAmenity; 
   DateTime? _selectedDate;
   // Listas para las fechas ocupadas
   List<DateTime> _confirmedDates = [];
@@ -88,8 +91,9 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
       }
     } catch (e) {
       if (mounted) {
+        final i18n = Provider.of<I18nProvider>(context, listen: false);
         setState(() {
-          _error = 'Error al cargar las amenidades: $e';
+          _error = i18n.t('amenityReservation.messages.loadAmenitiesError').replaceAll('{error}', e.toString());
           _isLoading = false;
         });
       }
@@ -127,8 +131,9 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
     } catch (e) {
       if (mounted) {
         _logService.log('Error en _fetchUserProperties: $e');
+        final i18n = Provider.of<I18nProvider>(context, listen: false);
         setState(() {
-          _error = 'Error al cargar las propiedades del usuario: $e';
+          _error = i18n.t('amenityReservation.messages.loadPropertiesError').replaceAll('{error}', e.toString());
         });
       }
     }
@@ -157,6 +162,10 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
       }
     } catch (e) {
       _logService.log('Error al cargar mis reservas: $e');
+      if (mounted) {
+        final i18n = Provider.of<I18nProvider>(context, listen: false);
+        NotificationService.showError(i18n.t('amenityReservation.messages.loadReservationsError').replaceAll('{error}', e.toString()));
+      }
     }
   }
 
@@ -193,39 +202,42 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
       }
     } catch (e) {
       _logService.log('Error al cargar fechas ocupadas: $e');
+      if (mounted) {
+        final i18n = Provider.of<I18nProvider>(context, listen: false);
+        NotificationService.showError(i18n.t('amenityReservation.messages.loadBookedDatesError').replaceAll('{error}', e.toString()));
+      }
     }
   }
 
   void _updateBookedReservationsForDay(DateTime date) {
     final dateOnly = DateTime(date.year, date.month, date.day);
     final bookings = _myReservations
-        .where((res) {
-          final resDate = DateTime.parse(res['start_datetime']).toLocal();
-          final resDateOnly = DateTime(resDate.year, resDate.month, resDate.day);
-          return res['amenity_id'] == _selectedAmenity?.id &&
-                 resDateOnly == dateOnly &&
-                 (res['status'] == 'pending' || res['status'] == 'confirmed');
-        })
-        .toList();
+        .where((res) =>
+            res['amenity_id'] == _selectedAmenity?.id &&
+            isSameDay(DateTime.parse(res['start_datetime']).toLocal(), dateOnly) &&
+            (res['status'] == 'pending' || res['status'] == 'confirmed'))
+        .toList()
+      ..sort((a, b) => DateTime.parse(a['start_datetime']).compareTo(DateTime.parse(b['start_datetime'])));
 
     setState(() => _bookedReservationsForDay = bookings);
   }
 
   Future<void> _cancelReservation(String reservationId) async {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     final shouldCancel = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmar Cancelación'),
-        content: const Text('¿Estás seguro de que deseas cancelar esta reserva?'),
+        title: Text(i18n.t('amenityReservation.cancelDialog.title')),
+        content: Text(i18n.t('amenityReservation.cancelDialog.content')),
         actions: [
           // La acción destructiva (cancelar) es un TextButton a la izquierda.
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-            child: const Text('Sí, Cancelar'),
+            child: Text(i18n.t('amenityReservation.cancelDialog.confirm')),
           ),
           // La acción segura (No) es un ElevatedButton a la derecha, que recibe el foco por defecto.
-          ElevatedButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('No')),
+          ElevatedButton(onPressed: () => Navigator.of(context).pop(false), child: Text(i18n.t('amenityReservation.cancelDialog.deny'))),
         ],
       ),
     );
@@ -244,10 +256,10 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
           'p_user_location_fee_id': null, 'p_event_name': null,
         },
       );
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reserva cancelada.'), backgroundColor: Colors.green));
+      NotificationService.showSuccess(i18n.t('amenityReservation.messages.cancelSuccess'));
       await _fetchMyReservations();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al cancelar la reserva: $e'), backgroundColor: Colors.red));
+      NotificationService.showError(i18n.t('amenityReservation.messages.cancelError').replaceAll('{error}', e.toString()));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -255,6 +267,7 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
 
   Future<void> _confirmReservation() async {
     // Añadimos la validación para la propiedad seleccionada
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     // --- INICIO: Log de depuración para la validación ---
     _logService.log('--- Validando campos para la reserva ---');
     _logService.log('Amenidad seleccionada: ${_selectedAmenity?.name ?? 'null'}');
@@ -266,8 +279,9 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
     _logService.log('-----------------------------------------');
     // --- FIN: Log de depuración ---
 
+
     if (_selectedAmenity == null || _selectedDate == null || _startTime == null || _endTime == null || _selectedLocationId == null || _eventNameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Por favor, complete todos los campos.')));
+      NotificationService.showWarning(i18n.t('amenityReservation.messages.fillAllFields'));
       return;
     }
 
@@ -275,7 +289,7 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
     final endDateTime = DateTime(_selectedDate!.year, _selectedDate!.month, _selectedDate!.day, _endTime!.hour, _endTime!.minute);
 
     if (endDateTime.isBefore(startDateTime)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('La hora de fin no puede ser anterior a la de inicio.')));
+      NotificationService.showWarning(i18n.t('amenityReservation.messages.invalidTimeRange'));
       return;
     }
 
@@ -293,13 +307,10 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
         'p_event_name': _eventNameController.text,
       };
 
-      // --- INICIO: Log para depuración ---
-      _logService.log('Llamando a RPC "manage_amenity_reservation" con parámetros: $params');
-      // --- FIN: Log para depuración ---
-
-      // --- INICIO: Log para depuración ---
-      _logService.log('Llamando a RPC "manage_amenity_reservation" con parámetros: $params');
-      // --- FIN: Log para depuración ---
+      // --- INICIO: Log antes de la inserción ---
+      _logService.log('\n--- INICIANDO INSERCIÓN DE RESERVA ---');
+      _logService.log('Parámetros enviados a manage_amenity_reservation: $params');
+      // --- FIN: Log antes de la inserción ---
 
       await Supabase.instance.client.rpc(
         'manage_amenity_reservation',
@@ -307,12 +318,7 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('¡Reserva creada con éxito! Se ha generado el cargo correspondiente.'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        NotificationService.showSuccess(i18n.t('amenityReservation.messages.createSuccess'));
         // Resetear el estado para permitir una nueva reserva
         setState(() {
           _selectedAmenity = null;
@@ -343,12 +349,8 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
       // --- FIN: Log para depuración del error ---
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: SelectableText('Error al crear la reserva: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        NotificationService.showError(
+            i18n.t('amenityReservation.messages.createError').replaceAll('{error}', e.toString()));
         setState(() => _isLoading = false);
       }
     }
@@ -378,6 +380,7 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AppBackground(
@@ -392,16 +395,17 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
   }
 
   Widget _buildAppBar() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     return Positioned(
       top: 40,
       left: 0,
       right: 0,
       child: Row(
-        children: [ 
+        children: [
           IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
           Expanded(
             child: Text(
-              'Reservar Amenidad',
+              i18n.t('amenityReservation.title'),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleLarge,
             ),
@@ -413,12 +417,16 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
   }
 
   Widget _buildContent() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     return Padding(
       padding: const EdgeInsets.only(top: 80.0), // Espacio para el AppBar
       child: Column(
         children: [
           FilterStrip(
-            options: const ['Reservar', 'Mis Reservas'],
+            options: [
+              i18n.t('amenityReservation.tabs.book'),
+              i18n.t('amenityReservation.tabs.myReservations'),
+            ],
             selectedIndex: _selectedViewIndex,
             onSelected: (index) => setState(() => _selectedViewIndex = index),
           ),
@@ -446,7 +454,8 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
       return Center(child: Text(_error!));
     }
     if (_amenities.isEmpty) {
-      return const Center(child: Text('No hay amenidades disponibles.'));
+      final i18n = Provider.of<I18nProvider>(context, listen: false);
+      return Center(child: Text(i18n.t('amenityReservation.noAmenities')));
     }
 
     return ListView.builder(
@@ -454,6 +463,8 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
       itemCount: _amenities.length,
       itemBuilder: (context, index) {
         final amenity = _amenities[index];
+        final i18n = Provider.of<I18nProvider>(context, listen: false);
+        final locale = i18n.locale.toLanguageTag();
         final isSelected = _selectedAmenity == amenity;
 
         return GlassCard(
@@ -471,14 +482,14 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(child: Text(amenity.name, style: Theme.of(context).textTheme.titleMedium)),
-                          Text('Q${amenity.pricePerBase.toStringAsFixed(0)}', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                          Text(NumberFormat.simpleCurrency(locale: locale).format(amenity.pricePerBase), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Horas incluidas'),
+                          Text(i18n.t('amenityReservation.amenityCard.includedHours')),
                           Text('${amenity.includedHours}', style: const TextStyle(fontWeight: FontWeight.bold)),
                         ],
                       ),
@@ -486,7 +497,7 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Capacidad'),
+                          Text(i18n.t('amenityReservation.amenityCard.capacity')),
                           Text('${amenity.capacity ?? 'N/A'}p', style: const TextStyle(fontWeight: FontWeight.bold)),
                         ],
                       ),
@@ -504,8 +515,9 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
   }
 
   Widget _buildMyReservationsView() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     if (_myReservations.isEmpty) {
-      return const Center(child: Text('No tienes ninguna reserva.'));
+      return Center(child: Text(i18n.t('amenityReservation.noReservations')));
     }
 
     return ListView.builder(
@@ -519,12 +531,15 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
   }
 
   Widget _buildMyReservationCard(Map<String, dynamic> reservation) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
+    final locale = i18n.locale.toLanguageTag();
     final theme = Theme.of(context);
-    final eventName = reservation['event_name'] ?? 'Sin Nombre';
-    final amenityName = _amenities.firstWhere((a) => a.id == reservation['amenity_id'], orElse: () => Amenity(id: '', organizationId: '', name: 'Amenidad Desconocida', includedHours: 0, pricePerBase: 0, amenityType: '', feeId: '')).name;
+    final eventName = reservation['event_name'] ?? i18n.t('amenityReservation.myReservationsCard.noName');
+    final amenityName = _amenities.firstWhere((a) => a.id == reservation['amenity_id'], orElse: () => Amenity(id: '', organizationId: '', name: i18n.t('amenityReservation.myReservationsCard.unknownAmenity'), includedHours: 0, pricePerBase: 0, amenityType: '', feeId: '')).name;
     final startDateTime = DateTime.parse(reservation['start_datetime']);
     final endDateTime = DateTime.parse(reservation['end_datetime']);
-    final date = DateFormat('dd/MM/yyyy').format(startDateTime);
+    // CORRECCIÓN: Usamos un formato de fecha localizado.
+    final date = DateFormat.yMd(locale).format(startDateTime);
     final startTime = DateFormat('HH:mm').format(startDateTime);
     final endTime = DateFormat('HH:mm').format(endDateTime);
     final status = reservation['status'] as String? ?? 'pending';
@@ -547,11 +562,11 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
             ],
           ),
           const Divider(height: 16),
-          Text('Amenidad: $amenityName'),
-          Text('Fecha: $date de $startTime a $endTime'),
+          Text('${i18n.t('amenityReservation.myReservationsCard.amenity')}: $amenityName'),
+          Text('${i18n.t('amenityReservation.myReservationsCard.date')}: $date de $startTime a $endTime'),
           const SizedBox(height: 4),
           Text(
-            'Costo Total: Q${(reservation['total_amount'] as num? ?? 0).toStringAsFixed(2)}',
+            '${i18n.t('amenityReservation.myReservationsCard.totalCost')}: ${NumberFormat.simpleCurrency(locale: locale).format(reservation['total_amount'] as num? ?? 0)}',
             style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
@@ -567,7 +582,7 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
                     if (reservationId != null) _cancelReservation(reservationId);
                   },
                   style: TextButton.styleFrom(foregroundColor: theme.colorScheme.error),
-                  child: const Text('Cancelar'),
+                  child: Text(i18n.t('amenityReservation.myReservationsCard.cancelButton')),
                 ),
               ],
             ),
@@ -579,6 +594,8 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
   // --- FIN: Vistas para el IndexedStack ---
 
   Widget _buildExpandedView(Amenity amenity) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
+    final locale = i18n.locale.toLanguageTag();
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
@@ -599,14 +616,14 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (amenity.pricePerExtraHour != null)
-                  Text('Precio por hora extra: Q${amenity.pricePerExtraHour!.toStringAsFixed(2)}'),
+                  Text('${i18n.t('amenityReservation.amenityCard.extraHourPrice')}: ${NumberFormat.simpleCurrency(locale: locale).format(amenity.pricePerExtraHour)}'),
                 if (amenity.formattedUnavailableHours != null)
                   Text(amenity.formattedUnavailableHours!),
               ],
             ),
           ),
           CheckboxListTile(
-            title: const Text('Acepto las condiciones del reglamento interno'),
+            title: Text(i18n.t('amenityReservation.reservationForm.acceptTerms')),
             value: _hasAcceptedTerms,
             onChanged: (value) {
               setState(() {
@@ -648,6 +665,7 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
   // --- INICIO: Pasos del Wizard de Reserva ---
 
   void _validateSelectedTime() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     if (_selectedAmenity == null || (_startTime == null && _endTime == null)) {
       setState(() => _timeValidationError = null);
       return;
@@ -660,7 +678,7 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
       final startTimeDouble = _startTime!.hour + _startTime!.minute / 60.0;
       final fromDouble = from.hour + from.minute / 60.0;
       if (startTimeDouble < fromDouble) {
-        setState(() => _timeValidationError = 'La hora de inicio no puede ser antes de las ${from.format(context)}.');
+        setState(() => _timeValidationError = i18n.t('amenityReservation.messages.invalidStartTime').replaceAll('{time}', from.format(context)));
         return;
       }
     }
@@ -669,7 +687,7 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
       final endTimeDouble = _endTime!.hour + _endTime!.minute / 60.0;
       final toDouble = to.hour + to.minute / 60.0;
       if (endTimeDouble > toDouble) {
-        setState(() => _timeValidationError = 'La hora de fin no puede ser después de las ${to.format(context)}.');
+        setState(() => _timeValidationError = i18n.t('amenityReservation.messages.invalidEndTime').replaceAll('{time}', to.format(context)));
         return;
       }
     }
@@ -677,13 +695,14 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
   }
 
   Widget _buildStep1CalendarView(bool isDarkMode) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     return Column(
       key: const ValueKey('step1'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text('1. Selecciona Fecha y Hora', style: Theme.of(context).textTheme.titleMedium),
+          child: Text(i18n.t('amenityReservation.reservationForm.step1Title'), style: Theme.of(context).textTheme.titleMedium),
         ),
         _buildCalendar(isDarkMode),
         const SizedBox(height: 8),
@@ -694,11 +713,11 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildTimePicker('Inicio', _startTime, (time) {
+              _buildTimePicker(i18n.t('amenityReservation.reservationForm.timePickerStart'), _startTime, (time) {
                 setState(() => _startTime = time);
                 _validateSelectedTime();
               }),
-              _buildTimePicker('Fin', _endTime, (time) {
+              _buildTimePicker(i18n.t('amenityReservation.reservationForm.timePickerEnd'), _endTime, (time) {
                 setState(() => _endTime = time);
                 _validateSelectedTime();
               }),
@@ -712,11 +731,11 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
+            child: ElevatedButton(              
               onPressed: (_selectedDate != null && _startTime != null && _endTime != null && _timeValidationError == null)
                   ? () => setState(() => _reservationStep = 1)
                   : null,
-              child: const Text('Siguiente'),
+              child: Text(i18n.t('amenityReservation.reservationForm.nextButton')),
             ),
           ),
         ),
@@ -725,13 +744,14 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
   }
 
   Widget _buildStep2DetailsView() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     return Column(
       key: const ValueKey('step2'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text('2. Completa los Detalles', style: Theme.of(context).textTheme.titleMedium),
+          child: Text(i18n.t('amenityReservation.reservationForm.step2Title'), style: Theme.of(context).textTheme.titleMedium),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
@@ -740,12 +760,12 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
             children: [
               TextFormField(
                 controller: _eventNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nombre del Evento',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16), // Hacemos el campo más compacto
+                decoration: InputDecoration(
+                  labelText: i18n.t('amenityReservation.reservationForm.eventNameLabel'),
+                  border: const OutlineInputBorder(),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 ),
-                validator: (v) => v == null || v.isEmpty ? 'Obligatorio' : null,
+                validator: (v) => v == null || v.isEmpty ? i18n.t('amenityReservation.reservationForm.eventNameRequired') : null,
               ),
               const SizedBox(height: 16),
               _buildPropertySelector(),
@@ -765,13 +785,13 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
               // El botón "Atrás" ahora es un TextButton para que sea una acción secundaria.
               TextButton(
                 onPressed: () => setState(() => _reservationStep = 0),
-                child: const Text('Atrás'),
+                child: Text(i18n.t('amenityReservation.reservationForm.backButton')),
               ),
               const Spacer(),
               ElevatedButton.icon(
                 onPressed: _isLoading ? null : _confirmReservation,
                 icon: _isLoading ? const SizedBox.shrink() : const Icon(Icons.check_circle_outline),
-                label: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text('Confirmar Reserva'),
+                label: _isLoading ? const CircularProgressIndicator(color: Colors.white) : Text(i18n.t('amenityReservation.reservationForm.confirmButton')),
               ),
             ],
           ),
@@ -783,9 +803,10 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
   // --- FIN: Pasos del Wizard de Reserva ---
 
   Widget _buildCalendar(bool isDarkMode) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     final theme = Theme.of(context);
     return TableCalendar(
-      locale: 'es_ES', // Usamos español
+      locale: i18n.locale.toLanguageTag(),
       calendarFormat: CalendarFormat.week, // Mostramos solo una semana
       firstDay: DateTime.now().subtract(const Duration(days: 1)),
       lastDay: DateTime.now().add(const Duration(days: 90)),
@@ -851,20 +872,21 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
   }
 
   Widget _buildPropertySelector() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     return DropdownButtonFormField<String>(
       isExpanded: true, // Evita el desbordamiento de texto largo.
-      // --- INICIO: Lógica mejorada para el valor y el hint ---
+      // --- INICIO: Lógica mejorada para el valor y el hint ---      
       initialValue: _userProperties.any((p) => p['location_id'] == _selectedLocationId)
           ? _selectedLocationId
           : null,
       hint: _userProperties.isEmpty
-          ? const Text('Cargando propiedades...')
-          : const Text('Selecciona una propiedad'),
+          ? Text(i18n.t('amenityReservation.reservationForm.loadingProperties'))
+          : Text(i18n.t('amenityReservation.reservationForm.propertyHint')),
       // --- FIN: Lógica mejorada ---
-      decoration: const InputDecoration(
-        labelText: 'Asignar cargo a la propiedad',
-        border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16), // Hacemos el campo más compacto
+      decoration: InputDecoration(
+        labelText: i18n.t('amenityReservation.reservationForm.propertyLabel'),
+        border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       ),
       items: _userProperties.map((prop) {
         return DropdownMenuItem(
@@ -884,14 +906,15 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
       }).toList(),
       onChanged: _userProperties.isEmpty ? null : (value) => setState(() => _selectedLocationId = value),
       validator: (value) {
-        if (_userProperties.isEmpty) return 'No hay propiedades para seleccionar.';
-        if (value == null) return 'Debe seleccionar una propiedad.';
+        if (_userProperties.isEmpty) return i18n.t('amenityReservation.reservationForm.noProperties');
+        if (value == null) return i18n.t('amenityReservation.reservationForm.propertyRequired');
         return null;
       },
     );
   }
 
   Widget _buildBookedHoursList() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     if (_bookedReservationsForDay.isEmpty) {
       return const SizedBox.shrink(); // No mostrar nada si no hay reservas
     }
@@ -901,12 +924,12 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Horarios ocupados para este día:', style: theme.textTheme.bodySmall),
+          Text(i18n.t('amenityReservation.bookedHours.title'), style: theme.textTheme.bodySmall),
           const SizedBox(height: 4),
           ..._bookedReservationsForDay.map((res) {
             final start = DateFormat('HH:mm').format(DateTime.parse(res['start_datetime']).toLocal());
             final end = DateFormat('HH:mm').format(DateTime.parse(res['end_datetime']).toLocal());
-            final status = res['status'] == 'confirmed' ? 'Confirmado' : 'Pendiente';
+            final status = res['status'] == 'confirmed' ? i18n.t('amenityReservation.bookedHours.confirmed') : i18n.t('amenityReservation.bookedHours.pending');
             return Text(
               '• $start - $end ($status)',
               style: theme.textTheme.bodyMedium?.copyWith(color: res['status'] == 'confirmed' ? theme.colorScheme.error : theme.colorScheme.secondary),
@@ -918,6 +941,7 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
   }
 
   Widget _buildTimePicker(String label, TimeOfDay? time, ValueChanged<TimeOfDay> onTimeChanged) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     return Column(
       children: [
         Text(label),
@@ -936,20 +960,21 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           ),
-          child: Text(time?.format(context) ?? 'Elegir'),
+          child: Text(time?.format(context) ?? i18n.t('amenityReservation.reservationForm.timePickerChoose')),
         ),
       ],
     );
   }
 
   Widget _buildCostSummary() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     final amenity = _selectedAmenity!;
     final start = DateTime(0, 1, 1, _startTime!.hour, _startTime!.minute);
     final end = DateTime(0, 1, 1, _endTime!.hour, _endTime!.minute);
     final duration = end.difference(start);
 
     if (duration.isNegative) {
-      return const Text('La hora de fin debe ser posterior a la de inicio.', style: TextStyle(color: Colors.red));
+      return Text(i18n.t('amenityReservation.messages.invalidTimeRange'), style: TextStyle(color: Theme.of(context).colorScheme.error));
     }
 
     final reservedHours = (duration.inMinutes / 60).ceil();
@@ -963,15 +988,15 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Resumen del Costo', style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
+          Text(i18n.t('amenityReservation.costSummary.title'), style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
           const Divider(),
-          _buildSummaryRow('Horas reservadas:', '$reservedHours'),
-          _buildSummaryRow('Horas incluidas:', '${amenity.includedHours}'),
-          _buildSummaryRow('Horas extra:', '$extraHours'),
+          _buildSummaryRow(i18n.t('amenityReservation.costSummary.reservedHours'), '$reservedHours'),
+          _buildSummaryRow(i18n.t('amenityReservation.costSummary.includedHours'), '${amenity.includedHours}'),
+          _buildSummaryRow(i18n.t('amenityReservation.costSummary.extraHours'), '$extraHours'),
           const Divider(),
           _buildSummaryRow(
-            'Total a Pagar:',
-            'Q${totalAmount.toStringAsFixed(2)}',
+            i18n.t('amenityReservation.costSummary.total'),
+            NumberFormat.simpleCurrency(locale: i18n.locale.toLanguageTag()).format(totalAmount),
             isTotal: true,
           ),
         ],
@@ -997,21 +1022,23 @@ class _AmenityReservationPageState extends State<AmenityReservationPage> {
   }
 
   Widget _buildStatusChip(String status) {
+    // CORRECCIÓN: Se añade la instancia de i18n para poder usar las traducciones.
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     Color color;
     String label;
     switch (status) {
       case 'confirmed':
-        color = Colors.green.withOpacity(0.2);
-        label = 'Confirmada';
+        color = Colors.green.withOpacity(0.2); // Color para estado confirmado
+        label = i18n.t('amenityReservation.status.confirmed');
         break;
       case 'cancelled':
-        color = Colors.red.withOpacity(0.2);
-        label = 'Cancelada';
+        color = Colors.red.withOpacity(0.2); // Color para estado cancelado
+        label = i18n.t('amenityReservation.status.cancelled');
         break;
       case 'pending':
       default:
-        color = Colors.orange.withOpacity(0.2);
-        label = 'Pendiente';
+        color = Colors.orange.withOpacity(0.2); // Color para estado pendiente
+        label = i18n.t('amenityReservation.status.pending');
         break;
     }
     return Chip(

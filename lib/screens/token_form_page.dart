@@ -9,7 +9,10 @@ import '../models/app_state.dart';
 import 'package:flexisuite_shared/flexisuite_shared.dart';
 import 'token_detail_screen.dart';
 import '../services/log_service.dart';
+import 'package:provider/provider.dart'; // Importar Provider
+import '../providers/i18n_provider.dart'; // Importar I18nProvider
 import '../widgets/guest_list_modal.dart'; // Importar el nuevo modal
+import '../services/notification_service.dart'; // Importar el servicio de notificaciones
 
 class TokenFormPage extends StatefulWidget {
   const TokenFormPage({super.key});
@@ -51,14 +54,6 @@ class _TokenFormPageState extends State<TokenFormPage> {
     'Energía/Agua': ['Energuate', 'Empresa Eléctrica','Agua Municipal'],
   };
 
-  // Etiquetas para los tipos de token para mantener la lógica intacta.
-  final Map<String, String> _tokenTypeLabels = {
-    'Individual': 'Individual',
-    'Servicios Básicos': 'Servicios',
-    'Recurrente': 'Recurrente',
-    'Eventos': 'Eventos',
-  };
-
   @override
   void initState() {
     super.initState();
@@ -94,8 +89,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
       });
     } catch (error) {
       _logService.log('Error fetching tokens: $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al cargar los tokens: $error')));
+      NotificationService.showError('Error al cargar los tokens: $error');
       setState(() {
         _isLoading = false;
       });
@@ -103,10 +97,11 @@ class _TokenFormPageState extends State<TokenFormPage> {
   }
 
   void showQR(String token) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('QR del Token'),
+        title: Text(i18n.t('tokenForm.messages.qrTitle')),
         content: QrImageView(
           data: token,
           version: QrVersions.auto,
@@ -115,16 +110,16 @@ class _TokenFormPageState extends State<TokenFormPage> {
           embeddedImageStyle: const QrEmbeddedImageStyle(size: Size(24, 24)),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cerrar')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(i18n.t('tokenForm.buttons.close'))),
         ],
       ),
     );
   }
 
   void copyToken(String token) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     Clipboard.setData(ClipboardData(text: token));
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Token copiado al portapapeles')));
+    NotificationService.showSuccess(i18n.t('tokenForm.messages.copied'));
   }
 
   Future<void> saveToken() async {
@@ -132,9 +127,9 @@ class _TokenFormPageState extends State<TokenFormPage> {
       _formKey.currentState!.save();
 
       final user = AppState.currentUser;
+      final i18n = Provider.of<I18nProvider>(context, listen: false);
       if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Error: Usuario no autenticado')));
+        NotificationService.showError(i18n.t('tokenForm.messages.authError'));
         return;
       }
 
@@ -181,9 +176,8 @@ class _TokenFormPageState extends State<TokenFormPage> {
       try {
         _logService.log('Enviando parámetros a create_token_1a1: ${jsonEncode(params)}');
         await Supabase.instance.client.rpc('create_token_1a1', params: params);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Token para "${_tokenType == 'Eventos' ? _eventName : _name}" guardado exitosamente.')),
-        );
+        final successMessage = i18n.t('tokenForm.messages.saveSuccess').replaceAll('{name}', _tokenType == 'Eventos' ? _eventName : _name);
+        NotificationService.showSuccess(successMessage);
 
         // --- INICIO: Lógica de reseteo del formulario ---
         setState(() {
@@ -200,8 +194,8 @@ class _TokenFormPageState extends State<TokenFormPage> {
       } catch (e) {
         _logService.log('Error al guardar el token: $e');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: SelectableText('Error al guardar el token: $e')));
+          final errorMessage = i18n.t('tokenForm.messages.saveError').replaceAll('{error}', e.toString());
+          NotificationService.showError(errorMessage);
         }
       }
     }
@@ -221,6 +215,14 @@ class _TokenFormPageState extends State<TokenFormPage> {
 
   Widget _buildTokenTypeSelector() {
     final theme = Theme.of(context);
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
+
+    final Map<String, String> tokenTypeLabels = {
+      'Individual': i18n.t('tokenForm.tokenTypes.individual'),
+      'Servicios Básicos': i18n.t('tokenForm.tokenTypes.services'),
+      'Recurrente': i18n.t('tokenForm.tokenTypes.recurrent'),
+      'Eventos': i18n.t('tokenForm.tokenTypes.events'),
+    };
 
     // Buscamos la característica 'token_event' en el estado global.
     final eventFeature = AppState.userFeatures.firstWhere(
@@ -232,7 +234,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
     return Wrap(
       spacing: 8.0,
       runSpacing: 8.0,
-      children: _tokenTypeLabels.entries.map((entry) {
+      children: tokenTypeLabels.entries.map((entry) {
         final type = entry.key;
         final label = entry.value;
         bool isSelected = _tokenType == type;
@@ -266,6 +268,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
 
   Widget _buildValiditySelector() {
     final theme = Theme.of(context);
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     return Wrap(
       spacing: 8.0,
       runSpacing: 8.0,
@@ -279,7 +282,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             textStyle: theme.textTheme.bodySmall,
           ),
-          child: Text('$hours horas'),
+          child: Text(i18n.t('tokenForm.validityHours').replaceAll('{hours}', hours.toString())),
         );
       }).toList(),
     );
@@ -287,20 +290,28 @@ class _TokenFormPageState extends State<TokenFormPage> {
 
   Widget _buildServiceCategorySelector() {
     final theme = Theme.of(context);
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
+
+    // Mapeo de claves de traducción a etiquetas mostradas
+    final Map<String, String> categoryLabels = {
+      'Telefonía': i18n.t('tokenForm.serviceCategories.telephony'),
+      'Energía/Agua': i18n.t('tokenForm.serviceCategories.utilities'),
+    };
+
     return Wrap(
       spacing: 8.0,
       runSpacing: 8.0,
-      children: serviceCategories.keys.map((category) {
-        bool isSelected = _selectedServiceCategory == category;
+      children: categoryLabels.entries.map((entry) {
+        bool isSelected = _selectedServiceCategory == entry.key;
         return ElevatedButton(
-          onPressed: () => setState(() => _selectedServiceCategory = category),
+          onPressed: () => setState(() => _selectedServiceCategory = entry.key),
           style: ElevatedButton.styleFrom(
             backgroundColor: isSelected ? theme.colorScheme.primary : theme.colorScheme.surface.withOpacity(0.5),
             foregroundColor: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             textStyle: theme.textTheme.bodySmall,
           ),
-          child: Text(category),
+          child: Text(entry.value),
         );
       }).toList(),
     );
@@ -334,6 +345,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
   Widget _buildTokenGrid() {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
 
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     final activeStatuses = ['green', 'orange', 'yellow'];
     final filteredTokens = _selectedFilterIndex == 0
         ? _tokens.where((t) => activeStatuses.contains(t['status_color'])).toList()
@@ -341,9 +353,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
 
     if (filteredTokens.isEmpty) {
       return Center(
-        child: Text(_selectedFilterIndex == 0
-            ? 'No tienes tokens vigentes.'
-            : 'No hay historial de tokens.'),
+        child: Text(_selectedFilterIndex == 0 ? i18n.t('tokenForm.empty.current') : i18n.t('tokenForm.empty.history')),
       );
     }
 
@@ -368,6 +378,9 @@ class _TokenFormPageState extends State<TokenFormPage> {
   }
 
   Widget _buildTokenCard(Map<String, dynamic> token) {
+    // CORRECCIÓN: Definimos la variable i18n para poder usarla en este widget.
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
+
     // Leemos el parámetro desde el estado global de la aplicación.
     final bool allowQrCodeDisplay = AppState.organizationParameters['ALLOW_QR_CODE_DISPLAY'] ?? false;
 
@@ -386,6 +399,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
       startDate = DateFormat('dd/MM/yy HH:mm').format(startDateTime);
       final validityHours = token['validity_hours'] as int? ?? 0;
       endDate = validityHours > 0
+          // CORRECCIÓN: Usamos ':' en lugar de '.' para el formato de hora.
           ? DateFormat('dd/MM/yy HH:mm').format(startDateTime.add(Duration(hours: validityHours)))
           : 'N/A';
     }
@@ -457,8 +471,8 @@ class _TokenFormPageState extends State<TokenFormPage> {
             Center(
               child: TextButton.icon(
                 onPressed: () => copyToken(token['token_code']),
-                icon: const Icon(Icons.copy, size: 16),
-                label: const Text('Copiar Token'),
+                icon: const Icon(Icons.copy_all_outlined, size: 16),
+                label: Text(i18n.t('tokenForm.messages.copied').split(' ').first), // "Copiar"
               ),
             ),
           ],
@@ -468,26 +482,27 @@ class _TokenFormPageState extends State<TokenFormPage> {
   }
 
   Widget _buildStatusChip(String? statusColor) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     Color color;
     String label;
     switch (statusColor) {
       case 'green':
         color = AppColors.tokenActive.withOpacity(0.2);
-        label = 'Activo';
+        label = i18n.t('tokenForm.status.active');
         break;
       case 'orange':
       case 'yellow':
         color = AppColors.tokenExpiring.withOpacity(0.2);
-        label = 'Expirando';
+        label = i18n.t('tokenForm.status.expiring');
         break;
       case 'red':
         color = AppColors.tokenExpired.withOpacity(0.2);
-        label = 'Expirado';
+        label = i18n.t('tokenForm.status.expired');
         break;
       case 'gray':
       default:
         color = AppColors.tokenRevoked.withOpacity(0.2);
-        label = 'Usado/Revocado';
+        label = i18n.t('tokenForm.status.used_revoked');
         break;
     }
     return Chip(
@@ -500,6 +515,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     return Scaffold(
       backgroundColor: Colors.transparent, // Fondo transparente para que se vea el AppBackground
       body: AppBackground(
@@ -523,14 +539,14 @@ class _TokenFormPageState extends State<TokenFormPage> {
                               const SizedBox(height: 20),
                               if (_tokenType == 'Individual') ...[
                                 TextFormField(
-                                  decoration: const InputDecoration(labelText: 'Nombre del invitado'),
-                                  validator: (val) => val == null || val.isEmpty ? 'Obligatorio' : null,
+                                  decoration: InputDecoration(labelText: i18n.t('tokenForm.form.guestName')),
+                                  validator: (val) => val == null || val.isEmpty ? i18n.t('tokenForm.form.requiredField') : null,
                                   onSaved: (val) => _name = val!,
                                 ),
                                 const SizedBox(height: 10),
                                 TextFormField(
-                                  decoration: const InputDecoration(labelText: 'CUI (DPI)'),
-                                  validator: (val) => val == null || val.isEmpty ? 'Obligatorio' : null,
+                                  decoration: InputDecoration(labelText: i18n.t('tokenForm.form.cui')),
+                                  validator: (val) => val == null || val.isEmpty ? i18n.t('tokenForm.form.requiredField') : null,
                                   onSaved: (val) => _cui = val!,
                                 ),
                                 const SizedBox(height: 10),
@@ -544,8 +560,8 @@ class _TokenFormPageState extends State<TokenFormPage> {
                                 ],
                                 const SizedBox(height: 10),
                                 TextFormField(
-                                  decoration: const InputDecoration(labelText: 'Nombre del contacto'),
-                                  validator: (val) => val == null || val.isEmpty ? 'Obligatorio' : null,
+                                  decoration: InputDecoration(labelText: i18n.t('tokenForm.form.contactName')),
+                                  validator: (val) => val == null || val.isEmpty ? i18n.t('tokenForm.form.requiredField') : null,
                                   onSaved: (val) => _name = val!,
                                 ),
                                 const SizedBox(height: 10),
@@ -553,14 +569,14 @@ class _TokenFormPageState extends State<TokenFormPage> {
                               if (_tokenType == 'Recurrente') ...[
                                 const SizedBox(height: 10),
                                 TextFormField(
-                                  decoration: const InputDecoration(labelText: 'Nombre del contacto'),
-                                  validator: (val) => val == null || val.isEmpty ? 'Obligatorio' : null,
+                                  decoration: InputDecoration(labelText: i18n.t('tokenForm.form.contactName')),
+                                  validator: (val) => val == null || val.isEmpty ? i18n.t('tokenForm.form.requiredField') : null,
                                   onSaved: (val) => _name = val!,
                                 ),
                                 const SizedBox(height: 10),
                                 TextFormField(
-                                  decoration: const InputDecoration(labelText: 'CUI (DPI)'),
-                                  validator: (val) => val == null || val.isEmpty ? 'Obligatorio' : null,
+                                  decoration: InputDecoration(labelText: i18n.t('tokenForm.form.cui')),
+                                  validator: (val) => val == null || val.isEmpty ? i18n.t('tokenForm.form.requiredField') : null,
                                   onSaved: (val) => _cui = val!,
                                 ),
                                 const SizedBox(height: 10),
@@ -570,7 +586,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
                                       child: InputDatePickerFormField(
                                         firstDate: DateTime.now(),
                                         lastDate: DateTime.now().add(const Duration(days: 365)),
-                                        fieldLabelText: 'Fecha inicio',
+                                        fieldLabelText: i18n.t('tokenForm.form.startDate'),
                                         initialDate: _recurrentStartDate ?? DateTime.now(),
                                         onDateSaved: (val) => _recurrentStartDate = val,
                                       ),
@@ -580,7 +596,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
                                       child: InputDatePickerFormField(
                                         firstDate: DateTime.now(),
                                         lastDate: DateTime.now().add(const Duration(days: 365)),
-                                        fieldLabelText: 'Fecha fin',
+                                        fieldLabelText: i18n.t('tokenForm.form.endDate'),
                                         initialDate: _recurrentEndDate ?? DateTime.now(),
                                         onDateSaved: (val) => _recurrentEndDate = val,
                                       ),
@@ -593,7 +609,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
                                     Expanded(
                                       child: TextFormField(
                                         readOnly: true,
-                                        decoration: const InputDecoration(labelText: 'Hora inicio'),
+                                        decoration: InputDecoration(labelText: i18n.t('tokenForm.form.startTime')),
                                         onTap: () async {
                                           TimeOfDay? time = await showTimePicker(
                                             context: context,
@@ -609,7 +625,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
                                     Expanded(
                                       child: TextFormField(
                                         readOnly: true,
-                                        decoration: const InputDecoration(labelText: 'Hora fin'),
+                                        decoration: InputDecoration(labelText: i18n.t('tokenForm.form.endTime')),
                                         onTap: () async {
                                           TimeOfDay? time = await showTimePicker(
                                             context: context,
@@ -626,15 +642,15 @@ class _TokenFormPageState extends State<TokenFormPage> {
                               ],
                               if (_tokenType == 'Eventos') ...[
                                 TextFormField(
-                                  decoration: const InputDecoration(labelText: 'Nombre del Evento'),
-                                  validator: (val) => val == null || val.isEmpty ? 'El nombre del evento es obligatorio' : null,
+                                  decoration: InputDecoration(labelText: i18n.t('tokenForm.form.eventName')),
+                                  validator: (val) => val == null || val.isEmpty ? i18n.t('tokenForm.form.requiredField') : null,
                                   onSaved: (val) => _eventName = val!,
                                 ),
                                 const SizedBox(height: 10),
                                 InputDatePickerFormField(
                                   firstDate: DateTime.now(),
                                   lastDate: DateTime.now().add(const Duration(days: 365)),
-                                  fieldLabelText: 'Fecha del Evento',
+                                  fieldLabelText: i18n.t('tokenForm.form.eventDate'),
                                   initialDate: _eventDate ?? DateTime.now(),
                                   onDateSaved: (val) => _eventDate = val,
                                 ),
@@ -644,26 +660,26 @@ class _TokenFormPageState extends State<TokenFormPage> {
                                     Expanded(
                                       child: TextFormField(
                                         readOnly: true,
-                                        decoration: const InputDecoration(labelText: 'Hora inicio'),
+                                        decoration: InputDecoration(labelText: i18n.t('tokenForm.form.startTime')),
                                         onTap: () async {
                                           TimeOfDay? time = await showTimePicker(context: context, initialTime: _eventStartTime ?? const TimeOfDay(hour: 0, minute: 0));
                                           if (time != null) setState(() => _eventStartTime = time);
                                         },
                                         controller: TextEditingController(text: (_eventStartTime ?? const TimeOfDay(hour: 0, minute: 0)).format(context)),
-                                        validator: (val) => _eventStartTime == null ? 'Hora de inicio obligatoria' : null,
+                                        validator: (val) => _eventStartTime == null ? i18n.t('tokenForm.form.requiredField') : null,
                                       ),
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: TextFormField(
                                         readOnly: true,
-                                        decoration: const InputDecoration(labelText: 'Hora fin'),
+                                        decoration: InputDecoration(labelText: i18n.t('tokenForm.form.endTime')),
                                         onTap: () async {
                                           TimeOfDay? time = await showTimePicker(context: context, initialTime: _eventEndTime ?? const TimeOfDay(hour: 23, minute: 59));
                                           if (time != null) setState(() => _eventEndTime = time);
                                         },
                                         controller: TextEditingController(text: (_eventEndTime ?? const TimeOfDay(hour: 23, minute: 59)).format(context)),
-                                        validator: (val) => _eventEndTime == null ? 'Hora de fin obligatoria' : null,
+                                        validator: (val) => _eventEndTime == null ? i18n.t('tokenForm.form.requiredField') : null,
                                       ),
                                     ),
                                   ],
@@ -672,9 +688,9 @@ class _TokenFormPageState extends State<TokenFormPage> {
                                 ElevatedButton.icon(
                                   onPressed: _showGuestManagementModal,
                                   icon: const Icon(Icons.upload_file),
-                                  label: Text(
-                                    _eventGuests.isEmpty ? 'Agregar Invitados' : 'Ver/Editar Lista (${_eventGuests.length} invitados)'
-                                  ),
+                                  label: Text(_eventGuests.isEmpty
+                                      ? i18n.t('tokenForm.form.addGuests')
+                                      : i18n.t('tokenForm.form.viewEditGuests').replaceAll('{count}', _eventGuests.length.toString())),
                                   style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.secondary),
                                 )
                               ],
@@ -691,7 +707,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
                                         height: 20,
                                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                                       )
-                                    : const Text('Guardar Token'),
+                                    : Text(i18n.t('tokenForm.buttons.save')),
                                 ),
                               const SizedBox(height: 20),
                             ],
@@ -700,7 +716,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
                       ),
                       const Divider(height: 30),
                       FilterStrip(
-                        options: const ['Vigentes', 'Historial'],
+                        options: [i18n.t('tokenForm.filters.current'), i18n.t('tokenForm.filters.history')],
                         selectedIndex: _selectedFilterIndex,
                         onSelected: (index) {
                           setState(() {
@@ -730,7 +746,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
                   IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
                   Expanded(
                     child: Text(
-                      'Crear Tokens de Ingreso',
+                      i18n.t('tokenForm.title'),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),

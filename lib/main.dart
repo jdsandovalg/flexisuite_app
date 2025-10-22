@@ -20,12 +20,9 @@ void main() async {
   // Inicializar la base de datos de zonas horarias
   tzdata.initializeTimeZones();
   // Establecer la zona horaria local por defecto (se usará si no se especifica una de organización)
-  tz.setLocalLocation(tz.getLocation(await FlutterNativeTimezone.getLocalTimezone()));
-
-  // --- INICIO: CAMBIO REQUERIDO ---
-  // Inicializa los datos de formato de fecha para el idioma español.
-  await initializeDateFormatting('es_ES', null); 
-  // --- FIN: CAMBIO REQUERIDO ---
+  try {
+    tz.setLocalLocation(tz.getLocation(await FlutterNativeTimezone.getLocalTimezone()));
+  } catch (e) { /* Ignorar si no se puede obtener la zona horaria nativa */ }
 
   await Supabase.initialize(
     url: 'https://webegmkgoelocauvwzzy.supabase.co', // reemplaza con tu URL de Supabase
@@ -35,6 +32,12 @@ void main() async {
   // --- INICIO: Inicialización explícita de proveedores ---
   final i18nProvider = I18nProvider();
   await i18nProvider.init(); // Esperamos a que cargue los idiomas y traducciones
+
+  // CORRECCIÓN: Inicializa los datos de formato de fecha para todos los idiomas soportados.
+  // Esto asegura que DateFormat funcione correctamente para cualquier idioma seleccionado.
+  await Future.wait(i18nProvider.supportedLocales.map(
+      (locale) => initializeDateFormatting(locale.toLanguageTag().replaceAll('-', '_'), null)
+  ));
   // --- FIN: Inicialización explícita ---
 
   runApp(

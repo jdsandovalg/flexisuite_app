@@ -5,6 +5,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import '../models/app_state.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:provider/provider.dart';
+import '../providers/i18n_provider.dart';
+import '../services/notification_service.dart';
 
 class FeePaymentReportPage extends StatefulWidget {
   const FeePaymentReportPage({super.key});
@@ -57,11 +60,10 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
         });
       }
     } catch (error) {
-      print('Error fetching fee charges: $error');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al cargar las cuotas: $error')),
-        );
+        final i18n = Provider.of<I18nProvider>(context, listen: false);
+        NotificationService.showError(
+            i18n.t('feePaymentReport.messages.loadError').replaceAll('{error}', error.toString()));
         setState(() => _isLoading = false);
       }
     }
@@ -70,7 +72,7 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
   void _showReportPaymentDialog(Map<String, dynamic> charge) {
     showDialog(
       context: context,
-      builder: (context) => ReportPaymentDialog(
+      builder: (dialogContext) => ReportPaymentDialog(
         isEditing: charge['payment_image'] != null, // Indica si estamos editando un reporte existente
         charge: charge,
         onReported: () {
@@ -81,9 +83,11 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
   }
 
   void _showPaymentImage(String imageUrl) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        title: Text(i18n.t('feePaymentReport.imageDialog.title')),
         contentPadding: const EdgeInsets.all(8),
         content: Image.network(
           imageUrl,
@@ -91,16 +95,17 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
             if (loadingProgress == null) return child;
             return const Center(child: CircularProgressIndicator());
           },
-          errorBuilder: (context, error, stackTrace) => const Center(
-            child: Text('No se pudo cargar la imagen.'),
+          errorBuilder: (context, error, stackTrace) => Center(
+            child: Text(i18n.t('feePaymentReport.imageDialog.loadError')),
           ),
         ),
-        actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cerrar'))],
+        actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n.t('feePaymentReport.imageDialog.close')))],
       ),
     );
   }
   @override
   Widget build(BuildContext context) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     return Scaffold(
       backgroundColor: Colors.transparent, // Mantenemos el fondo del Scaffold transparente
       body: AppBackground(
@@ -115,9 +120,12 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
                     : Column(
                         children: [
                           // Dejamos un espacio en la parte superior para el título y el botón
-                          const SizedBox(height: 80), 
+                          const SizedBox(height: 80),
                           FilterStrip(
-                            options: const ['Pendientes', 'Historial'],
+                            options: [
+                              i18n.t('feePaymentReport.filters.pending'),
+                              i18n.t('feePaymentReport.filters.history')
+                            ],
                             selectedIndex: _selectedFilterIndex,
                             onSelected: (index) {
                               setState(() {
@@ -141,7 +149,7 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
                   IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
                   Expanded(
                     child: Text(
-                      'Estado de Cuenta y Pagos',
+                      i18n.t('feePaymentReport.title'),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
@@ -157,15 +165,14 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
   }
 
   Widget _buildFeeGrid() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     final filteredCharges = _selectedFilterIndex == 0
         ? _feeCharges.where((c) => c['status'] == 'pending').toList()
         : _feeCharges.where((c) => c['status'] != 'pending').toList();
 
     if (filteredCharges.isEmpty) {
       return Center(
-        child: Text(_selectedFilterIndex == 0
-            ? 'No tienes cuotas pendientes.'
-            : 'No hay historial de cuotas.'),
+        child: Text(_selectedFilterIndex == 0 ? i18n.t('feePaymentReport.empty.pending') : i18n.t('feePaymentReport.empty.history')),
       );
     }
 
@@ -191,11 +198,13 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
   }
 
   Widget _buildFeeCard(Map<String, dynamic> charge) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
+    final locale = i18n.locale.toLanguageTag();
     final status = charge['status'] as String? ?? 'pending';
-    final feeName = charge['fee_name'] as String? ?? 'Cuota';
-    final amount = (charge['amount'] as num? ?? 0.0).toStringAsFixed(2);
+    final feeName = charge['fee_name'] as String? ?? i18n.t('feePaymentReport.card.feeName');
+    final amount = NumberFormat.simpleCurrency(locale: locale).format(charge['amount'] as num? ?? 0.0);
     final chargeDate = charge['charge_date'] != null
-        ? DateFormat('dd/MM/yyyy').format(DateTime.parse(charge['charge_date']))
+        ? DateFormat.yMd(locale).format(DateTime.parse(charge['charge_date']))
         : 'N/A';
     final hasPaymentReport = charge['payment_image'] != null;
     final paymentImageUrl = charge['payment_image'] as String?;
@@ -210,7 +219,7 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
             children: [
               Flexible(
                 child: Text(
-                  '$feeName - Q$amount',
+                  '$feeName - $amount',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -219,7 +228,7 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
             ],
           ),
           const Divider(height: 16),
-          Text('Fecha de cargo: $chargeDate'),
+          Text('${i18n.t('feePaymentReport.card.chargeDate')}: $chargeDate'),
           const Spacer(),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -228,20 +237,20 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
                 if (paymentImageUrl != null)
                   TextButton.icon(
                     icon: const Icon(Icons.receipt_long, size: 16),
-                    label: const Text('Ver'),
+                    label: Text(i18n.t('feePaymentReport.card.buttons.view')),
                     onPressed: () => _showPaymentImage(paymentImageUrl),
                   ),
                 ElevatedButton.icon(
                   // Desactivar el botón si el estado es 'paid'
                   onPressed: status == 'paid' ? null : () => _showReportPaymentDialog(charge),
                   icon: const Icon(Icons.edit, size: 16),
-                  label: const Text('Editar'),
+                  label: Text(i18n.t('feePaymentReport.card.buttons.edit')),
                   style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 12)),
                 ),
               ] else if (status == 'pending')
                 ElevatedButton(
                   onPressed: () => _showReportPaymentDialog(charge),
-                  child: const Text('Reportar Pago'),
+                  child: Text(i18n.t('feePaymentReport.card.buttons.reportPayment')),
                 ),
             ],
           ),
@@ -251,21 +260,22 @@ class _FeePaymentReportPageState extends State<FeePaymentReportPage> {
   }
 
   Widget _buildStatusChip(String status) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     Color color;
     String label;
     switch (status) {
       case 'paid':
         color = Colors.green.withOpacity(0.2);
-        label = 'Pagado';
+        label = i18n.t('feePaymentReport.status.paid');
         break;
       case 'overdue':
         color = Colors.red.withOpacity(0.2);
-        label = 'Vencido';
+        label = i18n.t('feePaymentReport.status.overdue');
         break;
       case 'pending':
       default:
         color = Colors.orange.withOpacity(0.2);
-        label = 'Pendiente';
+        label = i18n.t('feePaymentReport.status.pending');
         break;
     }
     return Chip(
@@ -308,6 +318,7 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.image,
         allowMultiple: false,
+        withData: true, // Asegura que los bytes del archivo se carguen en memoria.
       );
 
       if (result != null && result.files.first.bytes != null) {
@@ -317,9 +328,9 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al seleccionar la imagen: $e')),
-      );
+      final i18n = Provider.of<I18nProvider>(context, listen: false);
+      NotificationService.showError(
+          i18n.t('feePaymentReport.messages.imageSelectError').replaceAll('{error}', e.toString()));
     }
   }
 
@@ -354,12 +365,11 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
     }
   }
 
-  Future<void> _submitReport() async {
+  Future<void> _submitReport(BuildContext context) async {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     if (!_formKey.currentState!.validate()) return;
     if (_paymentImageBytes == null) { // Siempre se requiere una imagen al editar o crear.
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Debe adjuntar una imagen del comprobante.')),
-      );
+      NotificationService.showWarning(i18n.t('feePaymentReport.dialog.imageRequired'));
       return;
     }
 
@@ -429,22 +439,12 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
       if (mounted) {
         Navigator.of(context).pop(); // Cerrar el diálogo
         widget.onReported(); // Notificar a la página principal para que refresque
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Tu comprobante fue enviado. Administración validará tu pago.'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        NotificationService.showSuccess(i18n.t('feePaymentReport.messages.reportSuccess'));
       }
     } catch (error) {
-      print('Error submitting report: $error');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: SelectableText('Error al enviar el reporte: $error'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        NotificationService.showError(
+            i18n.t('feePaymentReport.messages.reportError').replaceAll('{error}', error.toString()));
       }
     } finally {
       if (mounted) {
@@ -455,6 +455,8 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
+    final locale = i18n.locale.toLanguageTag();
     // Reemplazamos AlertDialog por un Dialog personalizado para aplicar el tema.
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -468,24 +470,24 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.isEditing ? 'Editar Reporte de Pago' : 'Reportar Pago',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+                Text(widget.isEditing
+                    ? i18n.t('feePaymentReport.dialog.title.edit')
+                    : i18n.t('feePaymentReport.dialog.title.report'),
+                    style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 24),
                 // Solo mostrar campos de fecha y banco si NO estamos editando
                 if (!widget.isEditing) ...[
                   TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: 'Fecha de Pago',
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.calendar_today),
+                    decoration: InputDecoration(
+                      labelText: i18n.t('feePaymentReport.dialog.paymentDate'),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: const Icon(Icons.calendar_today),
                     ),
                     readOnly: true,
                     controller: TextEditingController(
                       text: _paymentDate == null
                           ? ''
-                          : DateFormat('dd/MM/yyyy').format(_paymentDate!),
+                          : DateFormat.yMd(locale).format(_paymentDate!),
                     ),
                     onTap: () async {
                       final pickedDate = await showDatePicker(
@@ -500,13 +502,13 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
                         });
                       }
                     },
-                    validator: (value) => _paymentDate == null ? 'La fecha es obligatoria' : null,
+                    validator: (value) => _paymentDate == null ? i18n.t('feePaymentReport.dialog.dateRequired') : null,
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     isExpanded: true, // Evita el desbordamiento de texto largo.
                     initialValue: _selectedBankId,
-                    decoration: const InputDecoration(labelText: 'Banco Destino', border: OutlineInputBorder()),
+                    decoration: InputDecoration(labelText: i18n.t('feePaymentReport.dialog.destinationBank'), border: const OutlineInputBorder()),
                     items: _banks.map((bank) {
                       final bankName = bank['bank_name'] ?? 'N/A';
                       final accountNumber = bank['account_number'] ?? 'N/A';
@@ -516,7 +518,7 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
                       );
                     }).toList(),
                     onChanged: (val) => setState(() => _selectedBankId = val),
-                    validator: (v) => v == null ? 'Debe seleccionar un banco' : null,
+                    validator: (v) => v == null ? i18n.t('feePaymentReport.dialog.bankRequired') : null,
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -525,12 +527,12 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
                     ElevatedButton.icon(
                       onPressed: _pickImage,
                       icon: const Icon(Icons.attach_file),
-                      label: Text(widget.isEditing ? 'Cambiar Imagen' : 'Adjuntar Imagen'),
+                      label: Text(widget.isEditing ? i18n.t('feePaymentReport.dialog.changeImage') : i18n.t('feePaymentReport.dialog.attachImage')),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        _paymentImageName ?? 'Ningún archivo seleccionado',
+                        _paymentImageName ?? i18n.t('feePaymentReport.dialog.noFileSelected'),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -539,9 +541,9 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _notesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Notas (Opcional)',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: i18n.t('feePaymentReport.dialog.notes'),
+                    border: const OutlineInputBorder(),
                   ),
                   maxLines: 2,
                 ),
@@ -551,18 +553,18 @@ class _ReportPaymentDialogState extends State<ReportPaymentDialog> {
                   children: [
                     TextButton(
                       onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-                      child: const Text('Cancelar'),
+                      child: Text(i18n.t('feePaymentReport.dialog.cancel')),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: _isSubmitting ? null : _submitReport,
+                      onPressed: (_isSubmitting || _paymentImageBytes == null) ? null : () => _submitReport(context),
                       child: _isSubmitting
                           ? const SizedBox(
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
-                          : Text(widget.isEditing ? 'Actualizar' : 'Enviar'),
+                          : Text(widget.isEditing ? i18n.t('feePaymentReport.dialog.update') : i18n.t('feePaymentReport.dialog.send')),
                     ),
                   ],
                 ),

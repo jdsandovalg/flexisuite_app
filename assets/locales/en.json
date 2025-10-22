@@ -15,5 +15,348 @@
     "cancelButton": "Cancel",
     "copyright": "© {year} Infosoft",
     "validation.invalidEmail": "Please enter a valid email"
+  },
+  "tokenForm": {
+    "title": "Create Access Tokens",
+    "tokenTypes": {
+      "individual": "Individual",
+      "services": "Services",
+      "recurrent": "Recurring",
+      "events": "Events"
+    },
+    "validityLabel": "Validity",
+    "validityHours": "{hours} hours",
+    "form": {
+      "guestName": "Guest name",
+      "cui": "CUI (ID)",
+      "contactName": "Contact name",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "eventName": "Event name",
+      "eventDate": "Event date",
+      "addGuests": "Add guests",
+      "viewEditGuests": "View/Edit list ({count} guests)",
+      "requiredField": "Required"
+    },
+    "buttons": {
+      "save": "Save Token",
+      "close": "Close"
+    },
+    "messages": {
+      "qrTitle": "Token QR",
+      "copied": "Token copied to clipboard",
+      "authError": "Error: User not authenticated",
+      "saveSuccess": "Token for \"{name}\" saved successfully.",
+      "saveError": "Error saving token: {error}"
+    },
+    "filters": {
+      "current": "Current",
+      "history": "History"
+    },
+    "empty": {
+      "current": "You have no current tokens.",
+      "history": "There is no token history."
+    },
+    "serviceCategories": {
+      "telephony": "Telephony",
+      "utilities": "Energy/Water"
+    },
+    "status": {
+      "active": "Active",
+      "expiring": "Expiring",
+      "expired": "Expired",
+      "used_revoked": "Used/Revoked"
+    }
+  },
+  "menu": {
+    "moreOptions": "More options",
+    "editProfile": "Edit Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "language": "Language",
+    "welcome": "Welcome",
+    "dateNotAvailable": "Date not available",
+    "eventWithoutTitle": "Event without title",
+    "criticalMenuLoadError": "Critical error loading menu: {error}",
+    "loadingMenu": "Loading menu...",
+    "menuLoadFailed": "Could not load menu",
+    "retry": "Retry",
+    "featureNotImplemented": "Feature \"{featureName}\" not implemented.",
+    "lockedFeatureTitle": "Feature Locked",
+    "lockedFeatureBody": "This feature is not available in your current plan. Contact support for more information.",
+    "lockedFeatureCta": "Unlock it now!",
+    "noUpcomingPublicEvents": "No upcoming public events.",
+    "noEventsCreatedYet": "You haven't created any events yet.",
+    "confirmLogoutTitle": "Confirm Logout",
+    "confirmLogoutMessage": "Are you sure you want to log out?",
+    "yesLogout": "Yes, Logout",
+    "no": "No",
+    "selectLanguage": "Select Language",
+    "more": "More",
+    "features": {
+      "cuota_reportar_pago": "Payments",
+      "Hall_Reservations": "Bookings",
+      "notifications": "Messages",
+      "token_create_simple": "Access",
+      "Community_Events": "Events",
+      "ticket_create": "Incidents"
+    }
+  },
+  "amenityReservation": {
+    "status": {
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "pending": "Pending"
+    }
+  },
+  "profileScreen": {
+    "title": "Edit Profile",
+    "personalInfo": "Personal Information",
+    "residenceInfo": "Residence Information",
+    "securityPrivacy": "Security & Privacy",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "birthDate": "Birth Date",
+    "phone": "Phone",
+    "bio": "Biography",
+    "condo": "Condominium",
+    "floor": "Floor",
+    "unitNumber": "Unit/House Number",
+    "newPassword": "New Password (leave blank to keep current)",
+    "newPasswordHelper": "Minimum 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 symbol (!@#$&*~).",
+    "confirmPassword": "Confirm New Password",
+    "privateAccount": "Private Account",
+    "chatNotifications": "Receive Chat Notifications",
+    "cancel": "Cancel",
+    "save": "Save Changes",
+    "requiredField": "This field is required",
+    "passwordMismatch": "Passwords do not match",
+    "passwordRequirements": "Password does not meet requirements.",
+    "locationNotFound": "Location not found",
+    "errorLoadingLocation": "Error getting location",
+    "tabs": {
+      "profile": "Profile",
+      "cards": "My Cards",
+      "fees": "My Fees"
+    },
+    "cards": {
+      "noCards": "You have no assigned access cards.",
+      "vehicular": "Vehicular",
+      "pedestrian": "Pedestrian",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "fees": {
+      "noFees": "You have no assigned fees.",
+      "current": "Current",
+      "notCurrent": "Not Current"
+    },
+    "messages": {
+      "loadError": "Error loading initial data: {error}",
+      "uploadError": "Error uploading photo: {error}",
+      "saveSuccess": "Profile updated successfully.",
+      "saveError": "Error saving profile: {error}"
+    }
+  },
+  "incidentForm": {
+    "title": "Create Incident",
+    "descriptionLabel": "Incident Description",
+    "descriptionRequired": "Description is required",
+    "priorityLabel": "Priority",
+    "departmentLabel": "Department",
+    "useGpsLabel": "Attach my GPS location",
+    "gpsCoordinates": "Lat: {lat}, Lon: {lon}",
+    "locationLabel": "Incident Location",
+    "locationHint": "Select location...",
+    "locationRequired": "Location is required",
+    "assignToLabel": "Assign to (Optional)",
+    "createButton": "Create Ticket",
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "departments": {
+      "security": "Security",
+      "maintenance": "Maintenance",
+      "ornament": "Decoration",
+      "other": "Other"
+    },
+    "filters": {
+      "open": "Open",
+      "in_progress": "In Progress",
+      "history": "History"
+    },
+    "empty": {
+      "open": "No open tickets.",
+      "in_progress": "No tickets in progress.",
+      "history": "No ticket history."
+    },
+    "card": {
+      "noCode": "N/C",
+      "noDescription": "No description",
+      "location": "Location",
+      "noLocation": "Not specified",
+      "created": "Created"
+    },
+    "messages": {
+      "loadError": "Error loading initial data: {error}",
+      "createSuccess": "Ticket created successfully.",
+      "createError": "Error creating ticket: {error}",
+      "permissionDenied": "Location permission denied.",
+      "gpsDisabled": "Please enable GPS on your device."
+    }
+  },
+  "feePaymentReport": {
+    "title": "Account Statement & Payments",
+    "filters": {
+      "pending": "Pending",
+      "history": "History"
+    },
+    "empty": {
+      "pending": "You have no pending fees.",
+      "history": "There is no fee history."
+    },
+    "card": {
+      "feeName": "Fee",
+      "chargeDate": "Charge Date",
+      "buttons": {
+        "view": "View",
+        "edit": "Edit",
+        "reportPayment": "Report Payment"
+      }
+    },
+    "status": {
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "pending": "Pending"
+    },
+    "dialog": {
+      "title": {
+        "report": "Report Payment",
+        "edit": "Edit Payment Report"
+      },
+      "paymentDate": "Payment Date",
+      "destinationBank": "Destination Bank",
+      "attachImage": "Attach Image",
+      "changeImage": "Change Image",
+      "noFileSelected": "No file selected",
+      "notes": "Notes (Optional)",
+      "cancel": "Cancel",
+      "update": "Update",
+      "send": "Send",
+      "dateRequired": "Date is required",
+      "bankRequired": "You must select a bank",
+      "imageRequired": "You must attach a proof of payment image."
+    },
+    "imageDialog": {
+      "title": "Payment Proof",
+      "close": "Close",
+      "loadError": "Could not load the image."
+    },
+    "messages": {
+      "loadError": "Error loading fees: {error}",
+      "imageSelectError": "Error selecting image: {error}",
+      "reportSuccess": "Your proof of payment has been sent. Administration will validate your payment.",
+      "reportError": "Error sending report: {error}"
+    }
+  },
+  "amenityReservation": {
+    "title": "Book Amenity",
+    "tabs": {
+      "book": "Book",
+      "myReservations": "My Bookings"
+    },
+    "noAmenities": "No amenities available.",
+    "noReservations": "You have no bookings.",
+    "amenityCard": {
+      "includedHours": "Included hours",
+      "capacity": "Capacity",
+      "extraHourPrice": "Price per extra hour"
+    },
+    "reservationForm": {
+      "acceptTerms": "I accept the conditions of the internal regulations",
+      "step1Title": "1. Select Date and Time",
+      "step2Title": "2. Complete Details",
+      "timePickerStart": "Start",
+      "timePickerEnd": "End",
+      "timePickerChoose": "Choose",
+      "nextButton": "Next",
+      "backButton": "Back",
+      "confirmButton": "Confirm Booking",
+      "eventNameLabel": "Event Name",
+      "propertyLabel": "Assign charge to property",
+      "propertyHint": "Select a property",
+      "loadingProperties": "Loading properties...",
+      "noProperties": "No properties to select.",
+      "propertyRequired": "You must select a property.",
+      "eventNameRequired": "Required"
+    },
+    "costSummary": {
+      "title": "Cost Summary",
+      "reservedHours": "Reserved hours",
+      "includedHours": "Included hours",
+      "extraHours": "Extra hours",
+      "total": "Total to Pay"
+    },
+    "bookedHours": {
+      "title": "Booked times for this day:",
+      "confirmed": "Confirmed",
+      "pending": "Pending"
+    },
+    "myReservationsCard": {
+      "noName": "No Name",
+      "unknownAmenity": "Unknown Amenity",
+      "amenity": "Amenity",
+      "date": "Date",
+      "totalCost": "Total Cost",
+      "cancelButton": "Cancel"
+    },
+    "cancelDialog": {
+      "title": "Confirm Cancellation",
+      "content": "Are you sure you want to cancel this booking?",
+      "confirm": "Yes, Cancel",
+      "deny": "No"
+    },
+    "messages": {
+      "loadAmenitiesError": "Error loading amenities: {error}",
+      "loadPropertiesError": "Error loading user properties: {error}",
+      "loadReservationsError": "Error loading my bookings: {error}",
+      "loadBookedDatesError": "Error loading booked dates: {error}",
+      "cancelSuccess": "Booking cancelled.",
+      "cancelError": "Error cancelling booking: {error}",
+      "createSuccess": "Booking created successfully! The corresponding charge has been generated.",
+      "createError": "Error creating booking: {error}",
+      "invalidTimeRange": "End time cannot be earlier than start time.",
+      "invalidStartTime": "Start time cannot be earlier than {time}.",
+      "invalidEndTime": "End time cannot be later than {time}.",
+      "fillAllFields": "Please fill in all fields."
+    },
+    "status": {
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "pending": "Pending"
+    }
+  },
+  "lockedFeatures": {
+    "Hall_Reservations": {
+      "title": "✨ Your Event, Your Space, Your App",
+      "body": "Imagine booking the hall for your birthday or the pool for a family gathering, and giving your guests a unique special token that opens the doors for them. Zero paperwork, zero complications: all from the App, with smart and organized access. An exclusive benefit of our premium plans.",
+      "cta": "🔑 I want this benefit"
+    },
+    "notifications": {
+      "title": "🔔 Your Community, Always Alert",
+      "body": "Receive important security notices, incidents, and reminders for your residence instantly. Stay informed and act in time to protect your home and family. Each alert includes a button for quick access to information and active participation in your community. All with a tap to access details and take immediate action.",
+      "cta": "⚡ Check notifications"
+    },
+    "Community_Events": {
+      "title": "✨ Make Your Events Organized and Memorable!",
+      "body": "Community Events allow you to plan and coordinate activities within the residential area, such as social gatherings, religious processions, sports tournaments, or cultural events.\nAssign roles to neighbors as coordinators, control the attendance of external guests with secure digital tokens, and track everything from your dashboard in real-time: dates, times, locations, and participants.\nOrganizing your activities has never been so easy and secure, and every event can be a memorable experience for all neighbors.",
+      "cta": "🔑 Discover how to start planning!"
+    }
   }
 }

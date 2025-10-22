@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async'; // Importar para usar Timer
+import 'package:provider/provider.dart'; // Importar Provider
 import '../models/app_state.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase
 import 'package:intl/intl.dart'; // Importar para formatear fechas
@@ -12,6 +13,7 @@ import 'amenity_reservation_page.dart'; // Importar la nueva pantalla de reserva
 import 'community_events_page.dart'; // Importar la nueva pantalla de eventos
 import 'settings_screen.dart'; // Importar la nueva pantalla de ajustes
 import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Importar para los iconos
+import '../providers/i18n_provider.dart'; // Importar el I18nProvider
 import '../services/log_service.dart'; // Importar el servicio de logs
 
 class MenuPage extends StatefulWidget {
@@ -256,17 +258,18 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   Widget _buildApprovedEventCard(Map<String, dynamic> event) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     final theme = Theme.of(context);
-    final title = event['title'] as String? ?? 'Evento sin título';
+    final title = event['title'] as String? ?? i18n.t('menu.eventWithoutTitle');
     final imageUrl = event['location_image'] as String?;
     final startDateTime = event['start_datetime'] != null ? DateTime.parse(event['start_datetime']) : null;
     final endDateTime = event['end_datetime'] != null ? DateTime.parse(event['end_datetime']) : null;
 
     final dateStr = startDateTime != null
-        ? DateFormat('dd MMM, yyyy', 'es_ES').format(startDateTime)
-        : 'Fecha no disponible';
-    final startTimeStr = startDateTime != null ? DateFormat('HH:mm', 'es_ES').format(startDateTime) : '--:--';
-    final endTimeStr = endDateTime != null ? DateFormat('HH:mm', 'es_ES').format(endDateTime) : '--:--';
+        ? DateFormat('dd MMM, yyyy', i18n.locale.toLanguageTag()).format(startDateTime)
+        : i18n.t('menu.dateNotAvailable');
+    final startTimeStr = startDateTime != null ? DateFormat('HH:mm', i18n.locale.toLanguageTag()).format(startDateTime) : '--:--';
+    final endTimeStr = endDateTime != null ? DateFormat('HH:mm', i18n.locale.toLanguageTag()).format(endDateTime) : '--:--';
 
     return GlassCard(
       margin: const EdgeInsets.symmetric(horizontal: 8.0), // Margen para espaciar las tarjetas en la lista
@@ -365,16 +368,17 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   Widget _buildWelcomePage() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     return GlassCard(
       margin: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center, // Centrar el contenido
         children: [
           Image.asset('assets/logo.png', height: 80),
           const SizedBox(height: 24),
-          const Text(
-            'Bienvenido',
+          Text(
+            i18n.t('menu.welcome'),
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ],
@@ -395,6 +399,7 @@ class _MenuPageState extends State<MenuPage> {
 
   @override
   Widget build(BuildContext context) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     final user = AppState.currentUser;
 
     // Transformamos la lista de features para añadir el widget del ícono y el color
@@ -446,40 +451,41 @@ class _MenuPageState extends State<MenuPage> {
   // --- INICIO: Métodos de construcción de UI refactorizados ---
 
   Widget _buildBody() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     if (_isLoading) {
-      return _buildLoading();
+      return _buildLoading(i18n);
     }
     if (_hasError) {
-      return _buildError();
+      return _buildError(i18n);
     }
     return _buildMenu();
   }
 
-  Widget _buildLoading() {
-    return const Center(
+  Widget _buildLoading(I18nProvider i18n) {
+    return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center, // Centrar el contenido
         children: [
           CircularProgressIndicator(),
           SizedBox(height: 20),
-          Text('Cargando menú...'),
+          Text(i18n.t('menu.loadingMenu')),
         ],
       ),
     );
   }
 
-  Widget _buildError() {
+  Widget _buildError(I18nProvider i18n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, color: Colors.redAccent, size: 60),
+          const Icon(Icons.error_outline, color: Colors.redAccent, size: 60), // Icono de error
           const SizedBox(height: 20),
-          const Text('No se pudo cargar el menú', style: TextStyle(fontSize: 18)),
+          Text(i18n.t('menu.menuLoadFailed'), style: const TextStyle(fontSize: 18)),
           const SizedBox(height: 20),
           ElevatedButton.icon(
             icon: const Icon(Icons.refresh),
-            label: const Text('Reintentar'),
+            label: Text(i18n.t('menu.retry')),
             onPressed: _fetchFeatures,
           ),
         ],
@@ -488,6 +494,7 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   Widget _buildMenu() {
+    // final i18n = Provider.of<I18nProvider>(context, listen: false);
     return Center(
       // CORRECCIÓN: Reemplazamos la columna por una llamada al nuevo carrusel unificado.
       // La lógica de bienvenida ahora vivirá dentro de este carrusel.
@@ -496,6 +503,7 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   Widget _buildBottomNavBar(List<Map<String, dynamic>> menuItems) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     final user = AppState.currentUser;
     if (menuItems.isEmpty) return const SizedBox.shrink();
 
@@ -508,7 +516,7 @@ class _MenuPageState extends State<MenuPage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             ...menuItems.map((item) => Flexible(child: _buildNavBarItem(item))),
-            Flexible(child: _buildProfilePopupMenu(user)),
+            Flexible(child: _buildProfilePopupMenu(user, i18n)),
           ],
         ),
       ),
@@ -516,11 +524,11 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   Widget _buildNavBarItem(Map<String, dynamic> item) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     final iconWidget = item['icon'] as Widget;
     final isLocked = item['value'] == 'locked';
     final featureCode = item['feature_code'] as String;
     final featureName = item['feature_name'] as String;
-    final shortDescription = item['short_description'] as String?;
 
     // Reemplazamos el FloatingActionButton por un widget más flexible.
     return Tooltip(
@@ -551,14 +559,17 @@ class _MenuPageState extends State<MenuPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               iconWidget,
-              if (shortDescription != null && shortDescription.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  shortDescription,
+              // CORRECCIÓN: Usamos el feature_code para obtener la traducción.
+              // El fallback al feature_code asegura que siempre se muestre algo si la traducción no existe.
+              const SizedBox(height: 4),
+              Builder(builder: (context) {
+                final label = i18n.t('menu.features.$featureCode') ?? featureCode;
+                return Text(
+                  label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 8),
                   textAlign: TextAlign.center,
-                ),
-              ],
+                );
+              }),
             ],
           ),
         ),
@@ -566,18 +577,22 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  Widget _buildProfilePopupMenu(UserModel? user) {
+  Widget _buildProfilePopupMenu(UserModel? user, I18nProvider i18n) {
     return PopupMenuButton<String>(
       color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
       tooltip: 'Más opciones',
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      onSelected: (value) => _onPopupMenuItemSelected(value),
+      onSelected: (value) => _onPopupMenuItemSelected(value, i18n), // Pasamos i18n
       itemBuilder: (context) => _buildPopupMenuItems(context, user),
-      child: const Padding(
+      child: Padding(
         padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [Icon(Icons.more_vert), SizedBox(height: 4), Text('Más', style: TextStyle(fontSize: 8))],
+          children: [
+            const Icon(Icons.more_vert),
+            const SizedBox(height: 4),
+            Text(i18n.t('menu.more'), style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 8)),
+          ],
         ),
       ),
     );
@@ -597,13 +612,17 @@ class _MenuPageState extends State<MenuPage> {
   Widget _buildLockedFeatureCard() {
     if (_selectedLockedFeature == null) return const SizedBox.shrink();
 
+    final featureCode = _selectedLockedFeature!['feature_code'] as String;
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     // Manejamos la posible errata en el nombre del campo 'locket_cta'
-    final ctaText = _selectedLockedFeature!['locket_cta'] ?? _selectedLockedFeature!['locked_cta'] ?? '¡Desbloquéalo ahora!';
+    final ctaText = i18n.t('lockedFeatures.$featureCode.cta') ?? _selectedLockedFeature!['locket_cta'] ?? _selectedLockedFeature!['locked_cta'] ?? i18n.t('menu.lockedFeatureCta');
+    final lockedTitle = i18n.t('lockedFeatures.$featureCode.title') ?? _selectedLockedFeature!['locked_title'] ?? i18n.t('menu.lockedFeatureTitle');
+    final lockedBody = i18n.t('lockedFeatures.$featureCode.body') ?? _selectedLockedFeature!['locked_body'] ?? i18n.t('menu.lockedFeatureBody');
 
     return Center(
       child: GestureDetector(
         onTap: () {}, // Evita que el toque en la tarjeta la cierre.
-        child: GlassCard(
+        child: GlassCard( // Tarjeta de cristal para el contenido
           margin: const EdgeInsets.symmetric(horizontal: 24),
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -611,7 +630,7 @@ class _MenuPageState extends State<MenuPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                _selectedLockedFeature!['locked_title'] ?? 'Funcionalidad Bloqueada',
+                lockedTitle,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
@@ -620,7 +639,7 @@ class _MenuPageState extends State<MenuPage> {
                 constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.3),
                 child: SingleChildScrollView(
                   child: Text(
-                    _selectedLockedFeature!['locked_body'] ?? 'Esta funcionalidad no está disponible en tu plan actual. Contacta a soporte para más información.',
+                    lockedBody,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
@@ -628,7 +647,7 @@ class _MenuPageState extends State<MenuPage> {
               ),
               const SizedBox(height: 24),
               Text(ctaText, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
-            ],
+            ], // Botón de llamada a la acción
           ),
         ),
       ),
@@ -638,6 +657,7 @@ class _MenuPageState extends State<MenuPage> {
   // --- FIN: Widgets y métodos para la tarjeta informativa ---
 
   List<PopupMenuEntry<String>> _buildPopupMenuItems(BuildContext context, UserModel? user) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     return <PopupMenuEntry<String>>[
       if (user != null) ...[
         PopupMenuItem<String>(
@@ -681,8 +701,8 @@ class _MenuPageState extends State<MenuPage> {
             Icon(Icons.account_circle,
                 color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: 12),
-            Text(
-              'Editar Perfil',
+            Text( // Texto del elemento de menú "Editar Perfil"
+              i18n.t('menu.editProfile'),
               style: TextStyle(
                   color: Theme.of(context)
                       .colorScheme
@@ -699,8 +719,8 @@ class _MenuPageState extends State<MenuPage> {
                 color:
                     Theme.of(context).colorScheme.secondary),
             const SizedBox(width: 12),
-            Text(
-              'Ajustes',
+            Text( // Texto del elemento de menú "Ajustes"
+              i18n.t('menu.settings'),
               style: TextStyle(
                   color: Theme.of(context)
                       .colorScheme
@@ -709,6 +729,19 @@ class _MenuPageState extends State<MenuPage> {
           ],
         ),
       ),
+      // --- INICIO: Selector de idioma usando un PopupMenuItem que abre un diálogo ---
+      PopupMenuItem<String>(
+        value: 'language',
+        onTap: () => _showLanguageSelectorDialog(context), // Llama a la función para mostrar el diálogo
+        child: Row(
+          children: [
+            Icon(Icons.translate, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 12),
+            Text(i18n.t('menu.language'), style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+          ],
+        ),
+      ),
+      // --- FIN: Selector de idioma ---
       const PopupMenuDivider(),
       PopupMenuItem<String>(
         value: 'logout',
@@ -716,8 +749,8 @@ class _MenuPageState extends State<MenuPage> {
           children: [
             const Icon(Icons.logout, color: Colors.redAccent),
             const SizedBox(width: 12),
-            Text(
-              'Cerrar Sesión',
+            Text( // Texto del elemento de menú "Cerrar Sesión"
+              i18n.t('menu.logout'),
               style: TextStyle(
                   color: Colors.redAccent),
             ),
@@ -727,7 +760,7 @@ class _MenuPageState extends State<MenuPage> {
     ];
   }
 
-  void _onPopupMenuItemSelected(String value) async {
+  void _onPopupMenuItemSelected(String value, I18nProvider i18n) async {
     switch (value) {
       case 'profile':
         Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
@@ -735,12 +768,11 @@ class _MenuPageState extends State<MenuPage> {
       case 'settings':
         _showSettingsModal();
         break;
+      case 'language':
+        // La acción ya se maneja en el onTap del PopupMenuItem
+        break;
       case 'logout':
-        AppState.currentUser = null;
-        await Supabase.instance.client.auth.signOut();
-        if (context.mounted) {
-          Navigator.of(context).pushReplacementNamed('/login');
-        }
+        _confirmLogout(context, i18n); // Llamamos a la función de confirmación
         break;
     }
   }
@@ -763,5 +795,70 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   // Función auxiliar para convertir el código hexadecimal en un objeto Color
-  Color _colorFromHex(String? hexCode) => Color(int.parse((hexCode ?? '#FFFFFF').replaceAll('#', 'FF'), radix: 16));
+  Color _colorFromHex(String? hexCode) => Color(int.parse((hexCode ?? '#FFFFFF').replaceAll('#', 'FF'), radix: 16)); // Convierte un código hexadecimal a un objeto Color
+
+  // --- INICIO: Nueva función para mostrar el diálogo de selección de idioma ---
+  void _showLanguageSelectorDialog(BuildContext context) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(i18n.t('menu.selectLanguage')),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: i18n.supportedLocales.map((locale) {
+                final langCode = locale.languageCode;
+                final isSelected = i18n.locale.languageCode == langCode;
+                return RadioListTile<Locale>(
+                  title: Text(i18n.getNativeLanguageName(langCode)),
+                  value: locale,
+                  groupValue: i18n.locale,
+                  onChanged: (value) {
+                    if (value != null) {
+                      i18n.setLocale(value);
+                      Navigator.of(dialogContext).pop(); // Cierra el diálogo después de seleccionar
+                    }
+                  },
+                  secondary: isSelected ? const Icon(Icons.check_circle_outline) : null,
+                );
+              }).toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(i18n.t('menu.no')), // Usamos la traducción para "No" o "Cancelar"
+            ),
+          ],
+        );
+      },
+    );
+  }
+  // --- FIN: Nueva función para mostrar el diálogo de selección de idioma ---
+
+  // --- INICIO: Función para confirmar el cierre de sesión ---
+  Future<void> _confirmLogout(BuildContext context, I18nProvider i18n) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(i18n.t('menu.confirmLogoutTitle')),
+        content: Text(i18n.t('menu.confirmLogoutMessage')),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(i18n.t('menu.no'))),
+          ElevatedButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(i18n.t('menu.yesLogout'))),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      AppState.currentUser = null;
+      await Supabase.instance.client.auth.signOut();
+      if (context.mounted) {
+        Navigator.of(context).pushReplacementNamed('/login');
+      }
+    }
+  }
+  // --- FIN: Función para confirmar el cierre de sesión ---
 }

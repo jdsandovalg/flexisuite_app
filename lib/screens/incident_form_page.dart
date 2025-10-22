@@ -5,6 +5,9 @@ import '../models/app_state.dart';
 import 'package:flexisuite_shared/flexisuite_shared.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
+import '../providers/i18n_provider.dart';
+import '../services/notification_service.dart';
 import '../widgets/location_tree_dialog.dart';
 
 class IncidentFormPage extends StatefulWidget {
@@ -35,19 +38,6 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
   List<Map<String, dynamic>> _admins = [];
   List<Map<String, dynamic>> _tickets = [];
 
-  // Opciones para los selectores
-  final Map<String, String> _priorityOptions = {
-    'low': 'Baja',
-    'medium': 'Media',
-    'high': 'Alta',
-  };
-  final Map<String, String> _departmentOptions = {
-    'security': 'Seguridad',
-    'maintenance': 'Mantenimiento',
-    'ornament': 'Ornato',
-    'other': 'Otro',
-  };
-
   // Estado para el filtro de tickets
   int _selectedFilterIndex = 0; // 0: Abiertos, 1: En Progreso, 2: Cerrados
 
@@ -66,10 +56,10 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
         _fetchTickets(),
       ]);
     } catch (error) {
+      final i18n = Provider.of<I18nProvider>(context, listen: false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al cargar datos iniciales: $error')),
-        );
+        NotificationService.showError(
+            i18n.t('incidentForm.messages.loadError').replaceAll('{error}', error.toString()));
       }
     } finally {
       if (mounted) {
@@ -100,12 +90,13 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
         });
       }
     } catch (error) {
-      print('Error fetching tickets: $error');
+      // No mostramos un error en la UI, solo lo logueamos.
     }
   }
 
   Future<void> _loadUserLocation() async {
     final user = AppState.currentUser;
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     if (user == null) return;
 
     // Llamamos directamente a get_location_path usando el ID del usuario.
@@ -122,9 +113,9 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
       // Asumimos que la ruta de IDs viene como un array de strings.
       final pathIds = List<String>.from(pathData?['path_ids'] ?? []);
       _selectedLocationId = pathIds.isNotEmpty ? pathIds.first : null; // El primer ID es el de la propiedad.
-      _locationPathController.text = pathData?['path_text'] ?? 'Ubicación no encontrada';
+      _locationPathController.text = pathData?['path_text'] ?? i18n.t('profileScreen.locationNotFound');
     } catch (e) {
-      _locationPathController.text = 'Error al obtener ubicación';
+      _locationPathController.text = i18n.t('profileScreen.errorLoadingLocation');
     }
   }
 
@@ -148,7 +139,7 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
         });
       }
     } catch (error) {
-      print('Error cargando todas las ubicaciones: $error');
+      // No mostramos un error en la UI, solo lo logueamos.
     }
   }
 
@@ -185,6 +176,7 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
 
   Future<void> _createTicket() async {
     if (!_formKey.currentState!.validate()) return;
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
 
     setState(() => _isLoading = true);
 
@@ -215,11 +207,8 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Ticket creado exitosamente.'),
-              backgroundColor: Colors.green),
-        );
+        NotificationService.showSuccess(i18n.t('incidentForm.messages.createSuccess'));
+
         _formKey.currentState?.reset();
         _descriptionController.clear();
         setState(() {
@@ -235,11 +224,8 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: SelectableText('Error al crear el ticket: $error'),
-              backgroundColor: Colors.red),
-        );
+        NotificationService.showError(
+            i18n.t('incidentForm.messages.createError').replaceAll('{error}', error.toString()));
       }
     } finally {
       if (mounted) {
@@ -277,6 +263,7 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
   }
 
   Future<void> _handleGpsSwitch(bool value) async {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     setState(() {
       _useGps = value;
       _currentPosition = null; // Reseteamos la posición al cambiar el switch
@@ -290,6 +277,7 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
           _currentPosition = position;
           _isFetchingLocation = false;
           if (position == null) {
+            NotificationService.showWarning(i18n.t('incidentForm.messages.permissionDenied'));
             _useGps = false; // Si no se pudo obtener, apagamos el switch
           }
         });
@@ -298,11 +286,12 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
   }
 
   Future<Position?> _getCurrentLocation() async {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     // 1. Pedir permisos
     var status = await Permission.locationWhenInUse.request();
     if (!status.isGranted) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Permiso de ubicación denegado.')));
+        NotificationService.showWarning(i18n.t('incidentForm.messages.permissionDenied'));
       }
       return null;
     }
@@ -311,7 +300,7 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Por favor, activa el GPS de tu dispositivo.')));
+        NotificationService.showWarning(i18n.t('incidentForm.messages.gpsDisabled'));
       }
       return null;
     }
@@ -328,6 +317,20 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
+
+    final Map<String, String> priorityOptions = {
+      'low': i18n.t('incidentForm.priorities.low'),
+      'medium': i18n.t('incidentForm.priorities.medium'),
+      'high': i18n.t('incidentForm.priorities.high'),
+    };
+    final Map<String, String> departmentOptions = {
+      'security': i18n.t('incidentForm.departments.security'),
+      'maintenance': i18n.t('incidentForm.departments.maintenance'),
+      'ornament': i18n.t('incidentForm.departments.ornament'),
+      'other': i18n.t('incidentForm.departments.other'),
+    };
+
     // Leemos el parámetro ALLOW_GPS desde el estado global de la aplicación.
     final bool allowGpsFeature = AppState.organizationParameters['ALLOW_GPS'] ?? false;
     return Scaffold(
@@ -353,35 +356,37 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
                             children: [
                               TextFormField(
                                 controller: _descriptionController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Descripción del Incidente',
+                                decoration: InputDecoration(
+                                  labelText: i18n.t('incidentForm.descriptionLabel'),
                                 ),
                                 maxLines: 3,
-                                validator: (v) => v == null || v.isEmpty ? 'La descripción es obligatoria' : null,
+                                validator: (v) => v == null || v.isEmpty ? i18n.t('incidentForm.descriptionRequired') : null,
                               ),
                               const SizedBox(height: 16),
-                              const Text('Prioridad', style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text(i18n.t('incidentForm.priorityLabel'), style: const TextStyle(fontWeight: FontWeight.bold)),
                               const SizedBox(height: 8),
                               _buildSelector(
-                                label: 'Prioridad',
+                                label: i18n.t('incidentForm.priorityLabel'),
                                 currentValue: _priority,
-                                options: _priorityOptions,
+                                options: priorityOptions,
                                 onSelected: (val) => setState(() => _priority = val)),
                               const SizedBox(height: 16),
-                              const Text('Departamento', style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text(i18n.t('incidentForm.departmentLabel'), style: const TextStyle(fontWeight: FontWeight.bold)),
                               const SizedBox(height: 8),
                               _buildSelector(
-                                label: 'Departamento',
+                                label: i18n.t('incidentForm.departmentLabel'),
                                 currentValue: _department,
-                                options: _departmentOptions,
+                                options: departmentOptions,
                                 onSelected: (val) => setState(() => _department = val),
                               ),
                               const SizedBox(height: 16),
                               // --- INICIO: Interruptor de GPS ---
                               SwitchListTile(
-                                title: const Text('Adjuntar mi ubicación GPS'),
+                                title: Text(i18n.t('incidentForm.useGpsLabel')),
                                 subtitle: _currentPosition != null
-                                    ? Text('Lat: ${_currentPosition!.latitude.toStringAsFixed(4)}, Lon: ${_currentPosition!.longitude.toStringAsFixed(4)}', style: Theme.of(context).textTheme.bodySmall)
+                                    ? Text(i18n.t('incidentForm.gpsCoordinates')
+                                        .replaceAll('{lat}', _currentPosition!.latitude.toStringAsFixed(4))
+                                        .replaceAll('{lon}', _currentPosition!.longitude.toStringAsFixed(4)), style: Theme.of(context).textTheme.bodySmall)
                                     : null,
                                 value: _useGps,
                                 onChanged: allowGpsFeature ? _handleGpsSwitch : null, // Deshabilitado si ALLOW_GPS es false
@@ -394,16 +399,16 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
                                 controller: _locationPathController,
                                 readOnly: true,
                                 decoration: InputDecoration(
-                                  labelText: 'Ubicación del Incidente',
+                                  labelText: i18n.t('incidentForm.locationLabel'),
                                   suffixIcon: const Icon(Icons.search),
-                                  hintText: _locationPathController.text.isEmpty ? 'Seleccionar ubicación...' : '',
+                                  hintText: _locationPathController.text.isEmpty ? i18n.t('incidentForm.locationHint') : '',
                                 ),
                                 onTap: () {
                                   _showLocationDialog();
                                 },
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'La ubicación es obligatoria';
+                                    return i18n.t('incidentForm.locationRequired');
                                   }
                                   return null;
                                 },
@@ -412,7 +417,7 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
                               const SizedBox(height: 16),
                               DropdownButtonFormField<String>(
                                 initialValue: _selectedAdminId,
-                                decoration: const InputDecoration(labelText: 'Asignar a (Opcional)'),
+                                decoration: InputDecoration(labelText: i18n.t('incidentForm.assignToLabel')),
                                 items: _admins.map((admin) {
                                   return DropdownMenuItem(
                                     value: admin['id'] as String,
@@ -427,7 +432,7 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
                                 child: ElevatedButton(
                                   onPressed: _isLoading ? null : _createTicket,
                                   style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                                  child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text('Crear Ticket'),
+                                  child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : Text(i18n.t('incidentForm.createButton')),
                                 ),
                               ),
                             ],
@@ -437,7 +442,11 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
                       const Divider(height: 40, thickness: 1),
                       // --- Filtro y Listado de Tickets ---
                       FilterStrip(
-                        options: const ['Abiertos', 'En Progreso', 'Historial'],
+                        options: [
+                          i18n.t('incidentForm.filters.open'),
+                          i18n.t('incidentForm.filters.in_progress'),
+                          i18n.t('incidentForm.filters.history'),
+                        ],
                         selectedIndex: _selectedFilterIndex,
                         onSelected: (index) {
                           setState(() {
@@ -464,7 +473,7 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
                   IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
                   Expanded(
                     child: Text(
-                      'Crear Incidente',
+                      i18n.t('incidentForm.title'),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
@@ -480,18 +489,19 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
   }
 
   Widget _buildTicketGrid() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     final List<Map<String, dynamic>> filteredTickets;
     String emptyMessage;
 
     if (_selectedFilterIndex == 0) { // Abiertos
       filteredTickets = _tickets.where((t) => t['status'] == 'open').toList();
-      emptyMessage = 'No hay tickets abiertos.';
+      emptyMessage = i18n.t('incidentForm.empty.open');
     } else if (_selectedFilterIndex == 1) { // En Progreso
       filteredTickets = _tickets.where((t) => t['status'] == 'in_progress').toList();
-      emptyMessage = 'No hay tickets en progreso.';
+      emptyMessage = i18n.t('incidentForm.empty.in_progress');
     } else { // Historial
       filteredTickets = _tickets.where((t) => t['status'] == 'closed' || t['status'] == 'resolved').toList();
-      emptyMessage = 'No hay historial de tickets.';
+      emptyMessage = i18n.t('incidentForm.empty.history');
     }
 
     if (filteredTickets.isEmpty) {
@@ -518,10 +528,14 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
   }
 
   Widget _buildTicketCard(Map<String, dynamic> ticket) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
+    final locale = i18n.locale.toLanguageTag();
+
     final createdAt = ticket['created_at'] != null
-        ? DateFormat('dd/MM/yyyy HH:mm').format(DateTime.parse(ticket['created_at']))
+        ? DateFormat.yMd(locale).add_Hm().format(DateTime.parse(ticket['created_at']))
         : 'N/A';
-    final priority = _priorityOptions[ticket['priority']] ?? ticket['priority'] ?? 'N/A';
+    final priorityKey = ticket['priority'] ?? 'medium';
+    final priority = i18n.t('incidentForm.priorities.$priorityKey');
 
     return GlassCard(
       margin: EdgeInsets.zero,
@@ -533,7 +547,7 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '#${ticket['ticket_code'] ?? 'S/C'}',
+                '#${ticket['ticket_code'] ?? i18n.t('incidentForm.card.noCode')}',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               Chip(
@@ -546,12 +560,12 @@ class _IncidentFormPageState extends State<IncidentFormPage> {
           ),
           const SizedBox(height: 4),
           Text(
-            ticket['description'] ?? 'Sin descripción',
+            ticket['description'] ?? i18n.t('incidentForm.card.noDescription'),
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const Spacer(),
-          Text('Ubicación: ${ticket['location_path'] ?? 'No especificada'}', style: Theme.of(context).textTheme.bodySmall),
-          Text('Creado: $createdAt', style: Theme.of(context).textTheme.bodySmall),
+          Text('${i18n.t('incidentForm.card.location')}: ${ticket['location_path'] ?? i18n.t('incidentForm.card.noLocation')}', style: Theme.of(context).textTheme.bodySmall),
+          Text('${i18n.t('incidentForm.card.created')}: $createdAt', style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
       ),

@@ -43,6 +43,7 @@ class _ProfilePhotoPickerState extends State<ProfilePhotoPicker> {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.image,
         allowMultiple: false,
+        withData: true, // Asegura que los bytes del archivo se carguen en memoria.
       );
 
       if (result != null && result.files.first.bytes != null) {
@@ -94,4 +95,3 @@ class _ProfilePhotoPickerState extends State<ProfilePhotoPicker> {
     );
   }
 }
-

@@ -15,5 +15,341 @@
     "cancelButton": "Cancelar",
     "copyright": "© {year} Infosoft",
     "validation.invalidEmail": "Ingrese un correo válido"
+  },
+  "tokenForm": {
+    "title": "Crear Tokens de Acceso",
+    "tokenTypes": {
+      "individual": "Individual",
+      "services": "Servicios",
+      "recurrent": "Recurrente",
+      "events": "Eventos"
+    },
+    "validityLabel": "Validez",
+    "validityHours": "{hours} horas",
+    "form": {
+      "guestName": "Nombre del invitado",
+      "cui": "CUI (DPI)",
+      "contactName": "Nombre del contacto",
+      "startDate": "Fecha de inicio",
+      "endDate": "Fecha de fin",
+      "startTime": "Hora de inicio",
+      "endTime": "Hora de fin",
+      "eventName": "Nombre del evento",
+      "eventDate": "Fecha del evento",
+      "addGuests": "Agregar invitados",
+      "viewEditGuests": "Ver/Editar lista ({count} invitados)",
+      "requiredField": "Obligatorio"
+    },
+    "buttons": {
+      "save": "Guardar Token",
+      "close": "Cerrar"
+    },
+    "messages": {
+      "qrTitle": "QR del Token",
+      "copied": "Token copiado al portapapeles",
+      "authError": "Error: Usuario no autenticado",
+      "saveSuccess": "Token para \"{name}\" guardado exitosamente.",
+      "saveError": "Error al guardar el token: {error}"
+    },
+    "filters": {
+      "current": "Vigentes",
+      "history": "Historial"
+    },
+    "empty": {
+      "current": "No tienes tokens vigentes.",
+      "history": "No hay historial de tokens."
+    },
+    "serviceCategories": {
+      "telephony": "Telefonía",
+      "utilities": "Energía/Agua"
+    },
+    "status": {
+      "active": "Activo",
+      "expiring": "Expirando",
+      "expired": "Expirado",
+      "used_revoked": "Usado/Revocado"
+    }
+  },
+  "menu": {
+    "moreOptions": "Más opciones",
+    "editProfile": "Editar Perfil",
+    "settings": "Ajustes",
+    "logout": "Cerrar Sesión",
+    "language": "Idioma",
+    "welcome": "Bienvenido",
+    "dateNotAvailable": "Fecha no disponible",
+    "eventWithoutTitle": "Evento sin título",
+    "criticalMenuLoadError": "Error crítico al cargar menú: {error}",
+    "loadingMenu": "Cargando menú...",
+    "menuLoadFailed": "No se pudo cargar el menú",
+    "retry": "Reintentar",
+    "featureNotImplemented": "Funcionalidad \"{featureName}\" no implementada.",
+    "lockedFeatureTitle": "Funcionalidad Bloqueada",
+    "lockedFeatureBody": "Esta funcionalidad no está disponible en tu plan actual. Contacta a soporte para más información.",
+    "lockedFeatureCta": "¡Desbloquéalo ahora!",
+    "noUpcomingPublicEvents": "No hay próximos eventos públicos.",
+    "noEventsCreatedYet": "Aún no has creado ningún evento.",
+    "confirmLogoutTitle": "Confirmar Cierre de Sesión",
+    "confirmLogoutMessage": "¿Estás seguro de que deseas cerrar sesión?",
+    "yesLogout": "Sí, Cerrar Sesión",
+    "no": "No",
+    "selectLanguage": "Seleccionar Idioma",
+    "more": "Más",
+    "features": {
+      "cuota_reportar_pago": "Pagos",
+      "Hall_Reservations": "Reservas",
+      "notifications": "Mensajes",
+      "token_create_simple": "Accesos",
+      "Community_Events": "Eventos",
+      "ticket_create": "Incidente"
+    }
+  },
+  "profileScreen": {
+    "title": "Editar Perfil",
+    "personalInfo": "Información Personal",
+    "residenceInfo": "Información de Residencia",
+    "securityPrivacy": "Seguridad y Privacidad",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "email": "Correo Electrónico",
+    "birthDate": "Fecha de Nacimiento",
+    "phone": "Teléfono",
+    "bio": "Biografía",
+    "condo": "Condominio",
+    "floor": "Piso",
+    "unitNumber": "Número de Unidad/Casa",
+    "newPassword": "Nueva Contraseña (dejar en blanco para no cambiar)",
+    "newPasswordHelper": "Mínimo 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 símbolo (!@#$&*~).",
+    "confirmPassword": "Confirmar Nueva Contraseña",
+    "privateAccount": "Cuenta Privada",
+    "chatNotifications": "Recibir Notificaciones de Chat",
+    "cancel": "Cancelar",
+    "save": "Guardar Cambios",
+    "requiredField": "Este campo es requerido",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "passwordRequirements": "La contraseña no cumple los requisitos.",
+    "locationNotFound": "Ubicación no encontrada",
+    "errorLoadingLocation": "Error al obtener ubicación",
+    "tabs": {
+      "profile": "Perfil",
+      "cards": "Mis Tarjetas",
+      "fees": "Mis Cuotas"
+    },
+    "cards": {
+      "noCards": "No tienes tarjetas de acceso asignadas.",
+      "vehicular": "Vehicular",
+      "pedestrian": "Peatonal",
+      "status": "Estado",
+      "active": "Activa",
+      "inactive": "Inactiva"
+    },
+    "fees": {
+      "noFees": "No tienes cuotas asignadas.",
+      "current": "Vigente",
+      "notCurrent": "No Vigente"
+    },
+    "messages": {
+      "loadError": "Error al cargar datos iniciales: {error}",
+      "uploadError": "Error al subir la foto: {error}",
+      "saveSuccess": "Perfil actualizado correctamente.",
+      "saveError": "Error al guardar el perfil: {error}"
+    }
+  },
+  "incidentForm": {
+    "title": "Crear Incidente",
+    "descriptionLabel": "Descripción del Incidente",
+    "descriptionRequired": "La descripción es obligatoria",
+    "priorityLabel": "Prioridad",
+    "departmentLabel": "Departamento",
+    "useGpsLabel": "Adjuntar mi ubicación GPS",
+    "gpsCoordinates": "Lat: {lat}, Lon: {lon}",
+    "locationLabel": "Ubicación del Incidente",
+    "locationHint": "Seleccionar ubicación...",
+    "locationRequired": "La ubicación es obligatoria",
+    "assignToLabel": "Asignar a (Opcional)",
+    "createButton": "Crear Ticket",
+    "priorities": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "departments": {
+      "security": "Seguridad",
+      "maintenance": "Mantenimiento",
+      "ornament": "Ornato",
+      "other": "Otro"
+    },
+    "filters": {
+      "open": "Abiertos",
+      "in_progress": "En Progreso",
+      "history": "Historial"
+    },
+    "empty": {
+      "open": "No hay tickets abiertos.",
+      "in_progress": "No hay tickets en progreso.",
+      "history": "No hay historial de tickets."
+    },
+    "card": {
+      "noCode": "S/C",
+      "noDescription": "Sin descripción",
+      "location": "Ubicación",
+      "noLocation": "No especificada",
+      "created": "Creado"
+    },
+    "messages": {
+      "loadError": "Error al cargar datos iniciales: {error}",
+      "createSuccess": "Ticket creado exitosamente.",
+      "createError": "Error al crear el ticket: {error}",
+      "permissionDenied": "Permiso de ubicación denegado.",
+      "gpsDisabled": "Por favor, activa el GPS de tu dispositivo."
+    }
+  },
+  "feePaymentReport": {
+    "title": "Estado de Cuenta y Pagos",
+    "filters": {
+      "pending": "Pendientes",
+      "history": "Historial"
+    },
+    "empty": {
+      "pending": "No tienes cuotas pendientes.",
+      "history": "No hay historial de cuotas."
+    },
+    "card": {
+      "feeName": "Cuota",
+      "chargeDate": "Fecha de cargo",
+      "buttons": {
+        "view": "Ver",
+        "edit": "Editar",
+        "reportPayment": "Reportar Pago"
+      }
+    },
+    "status": {
+      "paid": "Pagado",
+      "overdue": "Vencido",
+      "pending": "Pendiente"
+    },
+    "dialog": {
+      "title": {
+        "report": "Reportar Pago",
+        "edit": "Editar Reporte de Pago"
+      },
+      "paymentDate": "Fecha de Pago",
+      "destinationBank": "Banco Destino",
+      "attachImage": "Adjuntar Imagen",
+      "changeImage": "Cambiar Imagen",
+      "noFileSelected": "Ningún archivo seleccionado",
+      "notes": "Notas (Opcional)",
+      "cancel": "Cancelar",
+      "update": "Actualizar",
+      "send": "Enviar",
+      "dateRequired": "La fecha es obligatoria",
+      "bankRequired": "Debe seleccionar un banco",
+      "imageRequired": "Debe adjuntar una imagen del comprobante."
+    },
+    "imageDialog": {
+      "title": "Comprobante de Pago",
+      "close": "Cerrar",
+      "loadError": "No se pudo cargar la imagen."
+    },
+    "messages": {
+      "loadError": "Error al cargar las cuotas: {error}",
+      "imageSelectError": "Error al seleccionar la imagen: {error}",
+      "reportSuccess": "Tu comprobante fue enviado. Administración validará tu pago.",
+      "reportError": "Error al enviar el reporte: {error}"
+    }
+  },
+  "amenityReservation": {
+    "title": "Reservar Amenidad",
+    "tabs": {
+      "book": "Reservar",
+      "myReservations": "Mis Reservas"
+    },
+    "noAmenities": "No hay amenidades disponibles.",
+    "noReservations": "No tienes ninguna reserva.",
+    "amenityCard": {
+      "includedHours": "Horas incluidas",
+      "capacity": "Capacidad",
+      "extraHourPrice": "Precio por hora extra"
+    },
+    "reservationForm": {
+      "acceptTerms": "Acepto las condiciones del reglamento interno",
+      "step1Title": "1. Selecciona Fecha y Hora",
+      "step2Title": "2. Completa los Detalles",
+      "timePickerStart": "Inicio",
+      "timePickerEnd": "Fin",
+      "timePickerChoose": "Elegir",
+      "nextButton": "Siguiente",
+      "backButton": "Atrás",
+      "confirmButton": "Confirmar Reserva",
+      "eventNameLabel": "Nombre del Evento",
+      "propertyLabel": "Asignar cargo a la propiedad",
+      "propertyHint": "Selecciona una propiedad",
+      "loadingProperties": "Cargando propiedades...",
+      "noProperties": "No hay propiedades para seleccionar.",
+      "propertyRequired": "Debe seleccionar una propiedad.",
+      "eventNameRequired": "Obligatorio"
+    },
+    "costSummary": {
+      "title": "Resumen del Costo",
+      "reservedHours": "Horas reservadas",
+      "includedHours": "Horas incluidas",
+      "extraHours": "Horas extra",
+      "total": "Total a Pagar"
+    },
+    "bookedHours": {
+      "title": "Horarios ocupados para este día:",
+      "confirmed": "Confirmado",
+      "pending": "Pendiente"
+    },
+    "myReservationsCard": {
+      "noName": "Sin Nombre",
+      "unknownAmenity": "Amenidad Desconocida",
+      "amenity": "Amenidad",
+      "date": "Fecha",
+      "totalCost": "Costo Total",
+      "cancelButton": "Cancelar"
+    },
+    "cancelDialog": {
+      "title": "Confirmar Cancelación",
+      "content": "¿Estás seguro de que deseas cancelar esta reserva?",
+      "confirm": "Sí, Cancelar",
+      "deny": "No"
+    },
+    "messages": {
+      "loadAmenitiesError": "Error al cargar las amenidades: {error}",
+      "loadPropertiesError": "Error al cargar las propiedades del usuario: {error}",
+      "loadReservationsError": "Error al cargar mis reservas: {error}",
+      "loadBookedDatesError": "Error al cargar fechas ocupadas: {error}",
+      "cancelSuccess": "Reserva cancelada.",
+      "cancelError": "Error al cancelar la reserva: {error}",
+      "createSuccess": "¡Reserva creada con éxito! Se ha generado el cargo correspondiente.",
+      "createError": "Error al crear la reserva: {error}",
+      "invalidTimeRange": "La hora de fin no puede ser anterior a la de inicio.",
+      "invalidStartTime": "La hora de inicio no puede ser antes de las {time}.",
+      "invalidEndTime": "La hora de fin no puede ser después de las {time}.",
+      "fillAllFields": "Por favor, complete todos los campos."
+    },
+    "status": {
+      "confirmed": "Confirmada",
+      "cancelled": "Cancelada",
+      "pending": "Pendiente"
+    }
+  },
+  "lockedFeatures": {
+    "Hall_Reservations": {
+      "title": "✨ Tu evento, tu espacio, tu App",
+      "body": "Imagina reservar el salón para tu cumpleaños o la piscina para una reunión familiar, y entregar a tus invitados un token especial único que les abre las puertas. Cero trámites, cero complicaciones: todo desde la App, con acceso inteligente y organizado. Un beneficio exclusivo de nuestros planes premium.",
+      "cta": "🔑 Quiero este beneficio"
+    },
+    "notifications": {
+      "title": "🔔 Tu Comunidad, Siempre Alerta",
+      "body": "Recibe avisos importantes de seguridad, incidencias y recordatorios de tu residencia al instante. Mantente informado y actúa a tiempo para proteger tu hogar y tu familia. Cada alerta incluye un botón para acceder rápido a la información y participar activamente en tu comunidad. Todo con un toque para acceder al detalle y tomar acción inmediata.",
+      "cta": "⚡ Revisar notificaciones"
+    },
+    "Community_Events": {
+      "title": "✨ ¡Haz que tus eventos sean organizados y memorables!",
+      "body": "Los Eventos Comunitarios te permiten planificar y coordinar actividades dentro del residencial, como reuniones sociales, procesiones religiosas, torneos deportivos o eventos culturales.\nAsigna roles a vecinos como coordinadores, controla la asistencia de invitados externos mediante tokens digitales seguros y sigue todo desde tu dashboard en tiempo real: fechas, horarios, lugares y participantes.\nOrganizar tus actividades nunca fue tan fácil y seguro, y cada evento puede ser una experiencia memorable para todos los vecinos.",
+      "cta": "🔑 ¡Descubre cómo empezar a planear!"
+    }
   }
 }

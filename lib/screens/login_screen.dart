@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'forgot_password_screen.dart';
-import '../widgets/app_dialogs.dart';
 import 'menu_page.dart';
 import '../models/app_state.dart'; // Importar UserSessionProvider y UserModel
 import 'signup_screen.dart'; // Importar la nueva pantalla

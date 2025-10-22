@@ -176,6 +176,7 @@ class _GuestListModalState extends State<GuestListModal> {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['csv'],
+        withData: true, // Asegura que los bytes del archivo se carguen en memoria.
       );
 
       if (result != null && result.files.first.bytes != null) {

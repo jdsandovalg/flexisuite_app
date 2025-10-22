@@ -1,11 +1,15 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 // Importar la librería para JSON
+import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/app_state.dart';
 import 'package:flexisuite_shared/flexisuite_shared.dart'; // Importar el paquete compartido
 import '../widgets/profile_photo_picker.dart';
 import '../services/log_service.dart'; // Import LogService
+import 'package:provider/provider.dart';
+import '../providers/i18n_provider.dart';
+import '../services/notification_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -73,12 +77,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _fetchUserFees(),
       ]);
     } catch (error) {
+      final i18n = Provider.of<I18nProvider>(context, listen: false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: SelectableText('Error al cargar datos iniciales: $error'),
-            backgroundColor: Colors.red,
-          ),
+        NotificationService.showError(
+          i18n.t('profileScreen.messages.loadError')
+              .replaceAll('{error}', error.toString()),
         );
       }
     } finally {
@@ -91,6 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadProfileData() async {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     final result = await Supabase.instance.client.rpc(
       'manage_user_profile',
       params: {
@@ -126,9 +130,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final pathData = pathResult as Map<String, dynamic>?;
         final pathIds = List<String>.from(pathData?['path_ids'] ?? []);
         _selectedLocationId = pathIds.isNotEmpty ? pathIds.first : null;
-        _locationPathController.text = pathData?['path_text'] ?? 'Ubicación no encontrada';
+        _locationPathController.text = pathData?['path_text'] ?? i18n.t('profileScreen.locationNotFound');
       } catch (e) {
-        _locationPathController.text = 'Error al obtener ubicación';
+        _locationPathController.text = i18n.t('profileScreen.errorLoadingLocation');
       }
       setState(() {});
     }
@@ -177,6 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _uploadProfilePicture(Uint8List fileBytes, String fileName) async {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     setState(() => _isLoading = true);
 
     try {
@@ -198,11 +203,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: SelectableText('Error al subir la foto: $error'),
-            backgroundColor: Colors.red,
-          ),
+        NotificationService.showError(
+          i18n.t('profileScreen.messages.uploadError')
+              .replaceAll('{error}', error.toString()),
         );
       }
     } finally {
@@ -216,6 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     setState(() => _isLoading = true);
 
     try {
@@ -247,20 +251,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Perfil actualizado correctamente.'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        NotificationService.showSuccess(i18n.t('profileScreen.messages.saveSuccess'));
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: SelectableText('Error al guardar el perfil: $error'),
-            backgroundColor: Colors.red,
-          ),
+        NotificationService.showError(
+          i18n.t('profileScreen.messages.saveError')
+              .replaceAll('{error}', error.toString()),
         );
       }
     } finally {
@@ -271,6 +268,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildAccessCardsCarousel() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     final theme = Theme.of(context);
 
     if (_accessCards.isEmpty) {
@@ -278,10 +276,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: GlassCard(
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
-          child: const Text(
-            'No tienes tarjetas de acceso asignadas.',
-            textAlign: TextAlign.center,
-          ),
+          child: Text(i18n.t('profileScreen.cards.noCards'), textAlign: TextAlign.center),
         ),
       );
     }
@@ -299,15 +294,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Vehicular: ${card['vehicular_id'] ?? 'N/A'}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Text('${i18n.t('profileScreen.cards.vehicular')}: ${card['vehicular_id'] ?? 'N/A'}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
-                  Text('Peatonal: ${card['pedestrian_id'] ?? 'N/A'}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Text('${i18n.t('profileScreen.cards.pedestrian')}: ${card['pedestrian_id'] ?? 'N/A'}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Text('Estado: ', style: theme.textTheme.bodySmall),
+                      Text('${i18n.t('profileScreen.cards.status')}: ', style: theme.textTheme.bodySmall),
                       Icon(isActive ? Icons.check_circle : Icons.cancel, color: isActive ? theme.colorScheme.primary : theme.colorScheme.error, size: 16),
-                      Text(isActive ? ' Activa' : ' Inactiva', style: TextStyle(color: isActive ? theme.colorScheme.primary : theme.colorScheme.error, fontWeight: FontWeight.bold)),
+                      Text(isActive ? i18n.t('profileScreen.cards.active') : i18n.t('profileScreen.cards.inactive'), style: TextStyle(color: isActive ? theme.colorScheme.primary : theme.colorScheme.error, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ],
@@ -320,6 +315,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildUserFeesCarousel() {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     final theme = Theme.of(context);
 
     if (_userFees.isEmpty) {
@@ -327,10 +323,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: GlassCard(
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
-          child: const Text(
-            'No tienes cuotas asignadas.',
-            textAlign: TextAlign.center,
-          ),
+          child: Text(i18n.t('profileScreen.fees.noFees'), textAlign: TextAlign.center),
         ),
       );
     }
@@ -358,7 +351,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const Divider(height: 16),
                   // Si no hay cuotas para esta propiedad, mostramos un mensaje.
                   if (feesForProperty.isEmpty)
-                    const Text('No hay cuotas asignadas a esta propiedad.')
+                    Text(i18n.t('profileScreen.fees.noFees'))
                   else
                     // Usamos un Column para listar las cuotas de esta propiedad.
                     Column(
@@ -377,13 +370,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     Row(children: [
                                       Icon(isCurrent ? Icons.check_circle : Icons.cancel, color: isCurrent ? theme.colorScheme.primary : theme.colorScheme.error, size: 14),
                                       const SizedBox(width: 4),
-                                      Text(isCurrent ? 'Vigente' : 'No Vigente', style: theme.textTheme.bodySmall?.copyWith(color: isCurrent ? theme.colorScheme.primary : theme.colorScheme.error)),
+                                      Text(isCurrent ? i18n.t('profileScreen.fees.current') : i18n.t('profileScreen.fees.notCurrent'), style: theme.textTheme.bodySmall?.copyWith(color: isCurrent ? theme.colorScheme.primary : theme.colorScheme.error)),
                                     ]),
                                   ],
                                 ),
                               ),
                               Text(
-                                'Q${(fee['fee_amount'] as num? ?? 0).toStringAsFixed(2)}',
+                                NumberFormat.simpleCurrency(locale: i18n.locale.toLanguageTag())
+                                    .format(fee['fee_amount'] as num? ?? 0),
                                 style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
                               ),
                             ],
@@ -402,6 +396,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final i18n = Provider.of<I18nProvider>(context, listen: false);
     return Scaffold(
       backgroundColor: Colors.transparent, // Fondo transparente para que se vea el AppBackground
       body: AppBackground(
@@ -414,7 +409,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       const SizedBox(height: 80), // Espacio para el título flotante
                       FilterStrip(
-                        options: const ['Perfil', 'Mis Tarjetas', 'Mis Cuotas'],
+                        options: [
+                          i18n.t('profileScreen.tabs.profile'),
+                          i18n.t('profileScreen.tabs.cards'),
+                          i18n.t('profileScreen.tabs.fees'),
+                        ],
                         selectedIndex: _selectedViewIndex,
                         onSelected: (index) {
                           setState(() {
@@ -449,16 +448,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             data: Theme.of(context).copyWith(inputDecorationTheme: Theme.of(context).inputDecorationTheme),
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text('Información Personal', style: Theme.of(context).textTheme.titleLarge),
+                                              children: [                                                
+                                                Text(i18n.t('profileScreen.personalInfo'), style: Theme.of(context).textTheme.titleLarge),
                                                 const SizedBox(height: 16),
                                                 Row(children: [
                                                   Expanded(child: TextFormField(
                                                   controller: _firstNameController,
-                                                  decoration: const InputDecoration(labelText: 'Nombre'),
+                                                  decoration: InputDecoration(labelText: i18n.t('profileScreen.firstName')),
                                                   validator: (value) {
                                                     if (value == null || value.isEmpty) {
-                                                      return 'Este campo es requerido';
+                                                      return i18n.t('profileScreen.requiredField');
                                                     }
                                                     return null;
                                                   },
@@ -466,19 +465,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                   const SizedBox(width: 16),
                                                   Expanded(child: TextFormField(
                                                   controller: _lastNameController,
-                                                  decoration: const InputDecoration(labelText: 'Apellido'),
+                                                  decoration: InputDecoration(labelText: i18n.t('profileScreen.lastName')),
                                                   )),
                                                 ],),
                                                 const SizedBox(height: 16),
                                                 TextFormField(
                                                   controller: _emailController,
-                                                  decoration: const InputDecoration(labelText: 'Correo Electrónico'),
+                                                  decoration: InputDecoration(labelText: i18n.t('profileScreen.email')),
                                                   readOnly: true,
                                                 ),
                                                 const SizedBox(height: 16),
                                                 TextFormField(
                                                   controller: _birthDateController,
-                                                  decoration: const InputDecoration(labelText: 'Fecha de Nacimiento'),
+                                                  decoration: InputDecoration(labelText: i18n.t('profileScreen.birthDate')),
                                                   onTap: () async {
                                                     FocusScope.of(context).requestFocus(FocusNode());
                                                     final date = await showDatePicker(
@@ -488,19 +487,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                       lastDate: DateTime.now(),
                                                     );
                                                     if (date != null) {
-                                                      _birthDateController.text = date.toIso8601String().split('T').first;
+                                                      _birthDateController.text = DateFormat('yyyy-MM-dd').format(date);
                                                     }
                                                   },
                                                 ),
                                                 const SizedBox(height: 16),
                                                 TextFormField(
                                                   controller: _phoneController,
-                                                  decoration: const InputDecoration(labelText: 'Teléfono'),
+                                                  decoration: InputDecoration(labelText: i18n.t('profileScreen.phone')),
                                                 ),
                                                 const SizedBox(height: 16),
                                                 TextFormField(
                                                   controller: _bioController,
-                                                  decoration: const InputDecoration(labelText: 'Biografía'),
+                                                  decoration: InputDecoration(labelText: i18n.t('profileScreen.bio')),
                                                   maxLines: 3,
                                                 ),
                                               ],
@@ -510,22 +509,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         GlassCard(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text('Información de Residencia', style: Theme.of(context).textTheme.titleLarge),                                          
+                                            children: [                                              
+                                              Text(i18n.t('profileScreen.residenceInfo'), style: Theme.of(context).textTheme.titleLarge),
                                               TextFormField(
                                                 controller: _condoController,
-                                                decoration: const InputDecoration(labelText: 'Condominio'),
+                                                decoration: InputDecoration(labelText: i18n.t('profileScreen.condo')),
                                               ),
                                               const SizedBox(height: 16),
                                               Row(children: [
                                                 Expanded(child: TextFormField(
                                                   controller: _floorController,
-                                                  decoration: const InputDecoration(labelText: 'Piso'),
+                                                  decoration: InputDecoration(labelText: i18n.t('profileScreen.floor')),
                                                 )),
                                                 const SizedBox(width: 16),
                                                 Expanded(child: TextFormField(
                                                   controller: _unitNumberController,
-                                                  decoration: const InputDecoration(labelText: 'Número de Unidad/Casa'),
+                                                  decoration: InputDecoration(labelText: i18n.t('profileScreen.unitNumber')),
                                                 )),
                                               ],),
                                             ],
@@ -534,14 +533,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         GlassCard(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text('Seguridad y Privacidad', style: Theme.of(context).textTheme.titleLarge),
+                                            children: [                                              
+                                              Text(i18n.t('profileScreen.securityPrivacy'), style: Theme.of(context).textTheme.titleLarge),
                                               const SizedBox(height: 16),
                                               TextFormField(
                                                 controller: _passwordController,
-                                                decoration: const InputDecoration(
-                                                  labelText: 'Nueva Contraseña (dejar en blanco para no cambiar)',
-                                                  helperText: 'Mínimo 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 símbolo (!@#\$&*~).',
+                                                decoration: InputDecoration(
+                                                  labelText: i18n.t('profileScreen.newPassword'),
+                                                  helperText: i18n.t('profileScreen.newPasswordHelper'),
                                                   helperMaxLines: 2,
                                                 ),
                                                 obscureText: true,
@@ -551,10 +550,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                   }
                                                   String pattern = r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
                                                   if (!RegExp(pattern).hasMatch(value)) {
-                                                    return 'La contraseña no cumple los requisitos.';
+                                                    return i18n.t('profileScreen.passwordRequirements');
                                                   }
                                                   if (_confirmPasswordController.text.isNotEmpty && value != _confirmPasswordController.text) {
-                                                    return 'Las contraseñas no coinciden';
+                                                    return i18n.t('profileScreen.passwordMismatch');
                                                   }
                                                   return null;
                                                 },
@@ -563,20 +562,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               TextFormField(
                                                 controller: _confirmPasswordController,
                                                 decoration: InputDecoration(
-                                                  labelText: 'Confirmar Nueva Contraseña',
+                                                  labelText: i18n.t('profileScreen.confirmPassword'),
                                                   suffixIcon: _buildPasswordMatchIcon(),
                                                 ),
                                                 obscureText: true,
                                                 validator: (value) {
                                                   if (_passwordController.text.isNotEmpty && value != _passwordController.text) {
-                                                    return 'Las contraseñas no coinciden';
+                                                    return i18n.t('profileScreen.passwordMismatch');
                                                   }
                                                   return null;
                                                 },
                                               ),
                                               const SizedBox(height: 16),
                                               CheckboxListTile(
-                                                title: const Text('Cuenta Privada'),
+                                                title: Text(i18n.t('profileScreen.privateAccount')),
                                                 value: _isPrivate,
                                                 onChanged: (value) {
                                                   setState(() {
@@ -585,7 +584,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 },
                                               ),
                                               CheckboxListTile(
-                                                title: const Text('Recibir Notificaciones de Chat'),
+                                                title: Text(i18n.t('profileScreen.chatNotifications')),
                                                 value: _chatOptIn,
                                                 onChanged: (value) {
                                                   setState(() {
@@ -602,7 +601,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           children: [
                                             TextButton(
                                               onPressed: () => Navigator.of(context).pop(),
-                                              child: const Text('Cancelar'),
+                                              child: Text(i18n.t('profileScreen.cancel')),
                                             ),
                                             const SizedBox(width: 10),
                                             ElevatedButton(
@@ -613,7 +612,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               ),
                                               child: _isLoading
                                                   ? const CircularProgressIndicator(color: Colors.white)
-                                                  : const Text('Guardar Cambios'),
+                                                  : Text(i18n.t('profileScreen.save')),
                                             ),
                                           ],
                                         ),
@@ -642,7 +641,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
                         Expanded(
                           child: Text(
-                            'Editar Perfil',
+                            i18n.t('profileScreen.title'),
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.titleLarge,
                           ),

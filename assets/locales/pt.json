@@ -25,7 +25,9 @@
       "individual": "Individual",
       "services": "Serviços",
       "recurrent": "Recorrente",
-      "events": "Eventos"
+      "events": "Eventos",
+      "airbnb": "Airbnb",
+      "community_activities": "Atividades Comunitárias"
     },
     "validityLabel": "Validade",
     "validityHours": "{hours} horas",

@@ -160,7 +160,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
         'p_token_type': _tokenType,
         'p_guest_id': _tokenType == 'Servicios Básicos' ? _name : _cui,
         'p_guest_name': _name,
-        'p_is_recurring': _tokenType == 'Recurrente' || _tokenType == 'Airbnb',
+        'p_is_recurring': _tokenType == 'Recurrente',
         'p_daily_start': _recurrentStart != null ? '${_recurrentStart!.hour}:${_recurrentStart!.minute}' : null,
         'p_daily_end': _recurrentEnd != null ? '${_recurrentEnd!.hour}:${_recurrentEnd!.minute}' : null,
         'p_recurring_start_date': _recurrentStartDate?.toIso8601String(),
@@ -223,76 +223,53 @@ class _TokenFormPageState extends State<TokenFormPage> {
       'Recurrente': i18n.t('tokenForm.tokenTypes.recurrent'),
       'Eventos': i18n.t('tokenForm.tokenTypes.events'),
       'Airbnb': i18n.t('tokenForm.tokenTypes.airbnb'),
-      'Actividades Comunitarias': i18n.t('tokenForm.tokenTypes.community_activities'),
     };
 
+    // Buscamos la característica 'token_event' en el estado global.
     final eventFeature = AppState.userFeatures.firstWhere(
       (feature) => feature['feature_code'] == 'token_event',
-      orElse: () => {'value': 'locked'},
+      orElse: () => {'value': 'locked'}, // Si no se encuentra, se asume que está bloqueada.
     );
     final bool isEventFeatureUnlocked = eventFeature['value'] == 'unlocked';
 
-    // Función auxiliar para crear cada botón
-    Widget buildButton(String type, {bool isExpanded = false}) {
-      final label = tokenTypeLabels[type]!;
-      bool isSelected = _tokenType == type;
-      bool isButtonEnabled = true;
+    return Wrap(
+      spacing: 8.0,
+      runSpacing: 8.0,
+      children: tokenTypeLabels.entries.map((entry) {
+        final type = entry.key;
+        final label = entry.value;
+        bool isSelected = _tokenType == type;
 
-      if (type == 'Eventos' && !isEventFeatureUnlocked) {
-        isButtonEnabled = false;
-      } else if (type == 'Actividades Comunitarias') {
-        isButtonEnabled = false; // Siempre deshabilitado
-      }
+        // El botón "Eventos" se habilita solo si la característica está desbloqueada.
+        final bool isButtonEnabled = (type == 'Eventos' && !isEventFeatureUnlocked) ? false : true;
 
-      final button = ElevatedButton(
-        onPressed: isButtonEnabled ? () {
-          setState(() {
-            _tokenType = type;
-            if (type == 'Eventos') {
-              _eventDate ??= DateTime.now();
-              _eventStartTime ??= const TimeOfDay(hour: 0, minute: 0);
-              _eventEndTime ??= const TimeOfDay(hour: 23, minute: 59);
-            } else if (type == 'Airbnb') {
-              _recurrentStart = const TimeOfDay(hour: 0, minute: 0);
-              _recurrentEnd = const TimeOfDay(hour: 23, minute: 59);
-            }
-          });
-        } : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? theme.colorScheme.primary : theme.colorScheme.surface.withOpacity(0.5),
-          foregroundColor: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          textStyle: theme.textTheme.bodySmall,
-        ),
-        child: Text(label),
-      );
-
-      return isExpanded ? Expanded(child: button) : button;
-    }
-
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            buildButton('Individual'),
-            const SizedBox(width: 8),
-            buildButton('Servicios Básicos'),
-            const SizedBox(width: 8),
-            buildButton('Recurrente'),
-            const SizedBox(width: 8),
-            buildButton('Airbnb'),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            buildButton('Eventos', isExpanded: true),
-            const SizedBox(width: 8),
-            buildButton('Actividades Comunitarias', isExpanded: true),
-          ],
-        ),
-      ],
+        return ElevatedButton(
+          onPressed: isButtonEnabled ? () {
+            setState(() {
+              _tokenType = type;
+              // Si se selecciona "Eventos", inicializamos los valores de fecha y hora.
+              if (type == 'Eventos') {
+                _eventDate ??= DateTime.now();
+                _eventStartTime ??= const TimeOfDay(hour: 0, minute: 0);
+                _eventEndTime ??= const TimeOfDay(hour: 23, minute: 59);
+              } else if (type == 'Airbnb') {
+                // Por ahora no hacemos nada, solo seleccionamos el tipo.
+                // En pasos posteriores añadiremos la lógica.
+                // Ajustamos las horas por defecto para Airbnb
+                _recurrentStart = const TimeOfDay(hour: 0, minute: 0);
+                _recurrentEnd = const TimeOfDay(hour: 23, minute: 59);
+              }
+            });
+          } : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isSelected ? theme.colorScheme.primary : theme.colorScheme.surface.withOpacity(0.5),
+            foregroundColor: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            textStyle: theme.textTheme.bodySmall, // Usamos una fuente más pequeña
+          ),
+          child: Text(label),
+        );
+      }).toList(),
     );
   }
 
@@ -801,3 +778,7 @@ class _TokenFormPageState extends State<TokenFormPage> {
     );
   }
 }
+
+
+
+

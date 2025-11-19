@@ -2,9 +2,93 @@
 
 Este documento sirve como nuestra guía central para el desarrollo, seguimiento de tareas y registro de lecciones aprendidas.
 
+**IMPORTANTE: Al reiniciar sesión, lee primero este archivo completo para conocer el estado actual del proyecto.**
+
 ---
 
-## ✅ Avances y Tareas Completadas
+## ✅ Avances y Tareas Completadas (18 Nov 2025)
+
+### 🎉 Portal Admin: Generación de Cargos de Cuotas (NUEVO - 18 Nov 2025)
+
+**Screen:** `/flexisuite_portal/lib/screens/fee_charge_generation_screen.dart`
+
+**Funcionalidad Implementada:**
+- ✅ **Arquitectura de 3 paneles master-detail:**
+  - Panel 1 (Izquierda): Lista de Fees/Cuotas con contador de asignaciones
+  - Panel 2 (Centro): Asignaciones de residentes al fee seleccionado
+  - Panel 3 (Derecha): Cargos generados del residente seleccionado
+  
+- ✅ **CRUD de Fees - Modal Unificado:**
+  - Modal único `_showFeeModal({fee})` que sirve para crear Y editar
+  - Si recibe `fee` → modo edición, si no → modo creación
+  - **Toggle Buttons** para tipo: Recurrente vs Única vez
+  - **Fechas condicionales:** 
+    - Recurrente: 2 cards (Válida desde + Válida hasta opcional)
+    - Única vez: 1 card (fecha única que se copia a inicio y fin)
+  - Campos: Nombre, Monto, Día de cargo (1-31), Descripción
+  - Modal estilo PC: 700px ancho, 2 columnas, cards clicables, OutlineInputBorder
+  - Validaciones completas en todos los campos
+  - Debug logging detallado con stacktrace
+  
+- ✅ **Selección Visual y Estados:**
+  - Cards con color de fondo al seleccionar (fee, asignación)
+  - Indicadores visuales: ✅ activo / ⭕ inactivo (por fechas)
+  - Botón editar (✏️) solo aparece si el fee tiene 0 asignaciones
+  - Limpieza automática de paneles al cambiar selección
+  
+- ✅ **Carga de Datos con Filtrado de Nulos:**
+  - Queries optimizados: consultas separadas + Map joining (no joins complejos)
+  - Filtrado `.where((id) => id != null)` para evitar errores de UUID inválido
+  - Validación de arrays vacíos antes de `.inFilter()`
+  - Mounted checks antes de cada setState()
+  
+- ✅ **Panel de Cargos Mejorado:**
+  - Ordenamiento por fecha descendente (más recientes primero)
+  - Información completa: Fecha de cargo, Ubicación, Fecha de pago
+  - Formato visual mejorado: Cards, badges de estado, emojis
+  - Diferenciación clara: Pendiente (naranja) / Pagado (verde)
+  
+- ✅ **RLS Policies Configuradas:**
+  - Políticas permisivas en: fees, user_location_fees, user_fee_charges, locations, users
+  - Patrón: `FOR ALL USING (true) WITH CHECK (true)` (temporal para desarrollo)
+  
+- ✅ **Registro de Feature:**
+  - Feature code: `cuota_generar_cargo`
+  - SQL: `/flexisuite_app/SQLs/add_fee_charge_generation_feature.sql`
+  - Registrado en 3 planes con role: admin
+  - Navegación agregada en `main_screen.dart`
+  
+- ✅ **Traducciones i18n COMPLETAS:**
+  - Namespace `feeChargeGeneration` en 5 idiomas (es, en, fr, pt, de)
+  - 25+ claves traducidas en TODAS las pantallas
+  - **Portal:** Menú principal actualizado con traducciones
+  - **App:** Menú principal actualizado con traducciones
+  - Textos de UI, botones, modals, mensajes de error
+  - Uso de `I18nProvider` en todos los widgets
+  
+- ✅ **Formateo de Moneda:**
+  - Implementado sistema de formateo dinámico de moneda
+  - Detecta símbolo de moneda de la organización
+  - Formato correcto según locale (comas, puntos, separadores)
+  - Aplicado en: montos de fees, cargos, pagos
+  - Pattern: `NumberFormat.currency(locale: 'es_MX', symbol: '\$')`
+
+**Base de Datos:**
+- `fees`: id, organization_id, name, amount, description, default_day, is_recurring, valid_from, valid_to, fee_type(bigint-unused)
+- `user_location_fees`: id, user_id, organization_id, location_id, fee_id, valid_from, valid_to, is_active
+- `user_fee_charges`: id, user_fee_id, user_id, location_id, charge_date, amount, status, payment_date, payment_image, notes, bank_id
+- RPC: `generate_monthly_fee_charges(p_run_date)` - Genera cargos respetando default_day, usa ON CONFLICT DO NOTHING
+
+**Pendiente en esta Feature:**
+1. ⏳ **Botón "Asignar"** - Modal para asignar residentes a un fee
+2. ⏳ **Remover asignación** - Funcionalidad del botón eliminar en cada asignación
+3. ⏳ **Botón "Borrar"** - Eliminar cargos pendientes seleccionados (checkbox multi-select)
+4. ⏳ **Botón "Generar"** - Llamar RPC `generate_monthly_fee_charges` para mes seleccionado
+5. ⏳ **Revisar/ajustar RPC** - Es probable que necesite cambios según lógica de negocio
+6. ⏳ **Refinar RLS** - Cambiar de permisivo a organization-scoped: `organization_id IN (SELECT organization_id FROM user_profiles WHERE user_id = auth.uid())`
+7. ⏳ **Remover debug prints** - Limpiar console.log de producción
+
+---
 
 ### Gestión de Tokens de Acceso (`token_form_page.dart`)
 
@@ -16,6 +100,14 @@ Este documento sirve como nuestra guía central para el desarrollo, seguimiento 
 - **Reorganización de la Interfaz:**
   - Se rediseñó la sección de selección de tipo de token, organizando los botones en dos filas para una mejor distribución visual.
   - Se añadió un nuevo botón deshabilitado para "Actividades Comunitarias" como preparación para futuras funcionalidades.
+- **Fix Timezone Dinámico (18 Nov 2025):**
+  - **Eliminado cálculo de fechas en el frontend** que usaba `AppState.organizationTimeZone` hardcodeado.
+  - **Removido parámetro `p_expires_at`** que se calculaba localmente con zona horaria potencialmente incorrecta.
+  - **El backend ahora calcula automáticamente** el timezone correcto usando `get_organization_timezone(p_organization_id)` que navega la jerarquía de locations.
+  - **Cálculo de fechas delegado al RPC `create_token_1a1`** que usa el timezone correcto de la organización.
+  - Eliminada dependencia de `package:timezone/timezone.dart` en este screen.
+  - Esto garantiza que los tokens se crean con horarios correctos sin importar el país/timezone de la organización.
+
 
 ### Internacionalización (i18n) y Localización (l10n)
 

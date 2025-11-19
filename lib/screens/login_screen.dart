@@ -342,24 +342,17 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
-                          // --- INICIO: Fila para Copyright y Selector de Idioma ---
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Row(
-                              children: [
-                                Text(
-                                  i18n.t('login.copyright').replaceAll('{year}', DateTime.now().year.toString()),
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
-                                      ),
+                          const SizedBox(height: 16),
+                          // --- Selector de idioma minimalista con banderita ---
+                          _buildLanguageSelector(i18n, theme),
+                          const SizedBox(height: 16),
+                          // --- Copyright ---
+                          Text(
+                            i18n.t('login.copyright').replaceAll('{year}', DateTime.now().year.toString()),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
                                 ),
-                                const Spacer(), // Empuja el selector a la derecha
-                                _buildLanguageSelector(i18n, theme),
-                              ],
-                            ),
-                          ),
-                          // --- FIN: Fila para Copyright y Selector de Idioma ---
+                          )
                         ],
                       ),
                     ],
@@ -376,20 +369,10 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildLanguageSelector(I18nProvider i18n, ThemeData theme) {
     final currentLangCode = i18n.locale.languageCode;
     final currentLangName = i18n.getNativeLanguageName(currentLangCode);
+    final languageEmoji = _getLanguageEmoji(currentLangCode);
 
-    return TextButton.icon(
-      style: TextButton.styleFrom(
-        padding: EdgeInsets.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      icon: Icon(Icons.language, size: 16, color: theme.textTheme.bodySmall?.color?.withOpacity(0.7)),
-      label: Text(
-        '$currentLangName (${currentLangCode.toUpperCase()})',
-        style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.textTheme.bodySmall?.color?.withOpacity(0.9),
-            ),
-      ),
-      onPressed: () {
+    return InkWell(
+      onTap: () {
         final supportedLocales = i18n.supportedLocales;
         if (supportedLocales.length <= 1) return;
 
@@ -397,6 +380,54 @@ class _LoginScreenState extends State<LoginScreen> {
         final nextIndex = (currentIndex + 1) % supportedLocales.length;
         i18n.setLocale(supportedLocales[nextIndex]);
       },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: theme.colorScheme.onSurface.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.language, size: 16, color: theme.textTheme.bodySmall?.color?.withOpacity(0.7)),
+            const SizedBox(width: 6),
+            Text(
+              languageEmoji,
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              currentLangName,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.textTheme.bodySmall?.color?.withOpacity(0.9),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
+  }
+
+  String _getLanguageEmoji(String langCode) {
+    switch (langCode) {
+      case 'es':
+        return '🇪🇸';
+      case 'en':
+        return '🇺🇸';
+      case 'fr':
+        return '🇫🇷';
+      case 'pt':
+        return '🇵🇹';
+      case 'de':
+        return '🇩🇪';
+      default:
+        return '🌐';
+    }
   }
 }

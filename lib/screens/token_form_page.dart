@@ -4,7 +4,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:timezone/timezone.dart' as tz; // Importar para manejo de zonas horarias
 import '../models/app_state.dart';
 import 'package:flexisuite_shared/flexisuite_shared.dart';
 import 'token_detail_screen.dart';
@@ -133,26 +132,9 @@ class _TokenFormPageState extends State<TokenFormPage> {
         return;
       }
 
-      // Para los tokens de eventos, construimos la fecha de expiración exacta.
-      String? finalExpiresAt;
-      if (_tokenType == 'Eventos' && _eventDate != null && _eventStartTime != null && _eventEndTime != null) {
-        // 1. Obtener la zona horaria de la organización
-        final orgLocation = tz.getLocation(AppState.organizationTimeZone);
-
-        // 2. Crear la fecha y hora de fin del evento en la zona horaria de la organización
-        final eventEndDateTimeInOrgZone = tz.TZDateTime(
-          orgLocation,
-          _eventDate!.year, _eventDate!.month, _eventDate!.day,
-          _eventEndTime!.hour, _eventEndTime!.minute,
-        );
-        // 3. Convertir a UTC antes de enviar a la base de datos
-        finalExpiresAt = eventEndDateTimeInOrgZone.toUtc().toIso8601String();
-      } else if (_tokenType == 'Individual' || _tokenType == 'Servicios Básicos') {
-        // Para tokens individuales/servicios, calculamos la expiración desde ahora en la zona horaria de la organización.
-        final orgLocation = tz.getLocation(AppState.organizationTimeZone);
-        final expiresAtInOrgZone = tz.TZDateTime.now(orgLocation).add(Duration(hours: _validityHours));
-        finalExpiresAt = expiresAtInOrgZone.toUtc().toIso8601String();
-      }
+      // ✅ NUEVO: El backend calcula automáticamente el timezone y las fechas
+      // usando get_organization_timezone(p_organization_id)
+      // Ya NO enviamos p_expires_at ni calculamos fechas en el frontend
 
       final params = {
         'p_organization_id': user.organizationId,
@@ -165,11 +147,9 @@ class _TokenFormPageState extends State<TokenFormPage> {
         'p_daily_end': _recurrentEnd != null ? '${_recurrentEnd!.hour}:${_recurrentEnd!.minute}' : null,
         'p_recurring_start_date': _recurrentStartDate?.toIso8601String(),
         'p_recurring_end_date': _recurrentEndDate?.toIso8601String(),
-        'p_validity_hours': (_tokenType == 'Individual' || _tokenType == 'Servicios Básicos') ? _validityHours : null,        
-        'p_expires_at': finalExpiresAt, // Enviamos la fecha de expiración exacta.
-        'p_max_accesses': _tokenType == 'Eventos' ? _eventGuests.length : 1, // Usamos la longitud de la lista de invitados
+        'p_validity_hours': (_tokenType == 'Individual' || _tokenType == 'Servicios Básicos') ? _validityHours : null,
+        'p_max_accesses': _tokenType == 'Eventos' ? _eventGuests.length : 1,
         'p_event_name': _tokenType == 'Eventos' ? _eventName : null,
-        // Enviamos la lista directamente. El cliente de Supabase se encarga de serializarla a JSONB.
         'p_guests_json': _tokenType == 'Eventos' ? _eventGuests : null
       };
 

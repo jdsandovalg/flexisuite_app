@@ -86,7 +86,7 @@ class _MenuPageState extends State<MenuPage> {
     'arrowRightFromBracket': FontAwesomeIcons.arrowRightFromBracket,
     // Events
     'calendarDays': FontAwesomeIcons.calendarDays,
-    'users': FontAwesomeIcons.users, // Para 'Community_Events'
+    'communityEvents': FontAwesomeIcons.users, // Para 'Community_Events'
     'champagneGlasses': FontAwesomeIcons.champagneGlasses, // Para 'Hall_Reservations'
     'calendarCheck': FontAwesomeIcons.calendarCheck,
     // Places
@@ -399,9 +399,6 @@ class _MenuPageState extends State<MenuPage> {
 
   @override
   Widget build(BuildContext context) {
-    final i18n = Provider.of<I18nProvider>(context, listen: false);
-    final user = AppState.currentUser;
-
     // Transformamos la lista de features para añadir el widget del ícono y el color
     final menuItems = _features
         .where((f) => f['is_menu_item'] == true)
@@ -411,6 +408,8 @@ class _MenuPageState extends State<MenuPage> {
           final isLocked = feature['value'] == 'locked';
           final iconColor = _colorFromHex(colorCode);
           final featureCode = feature['feature_code'] as String?;
+          // Obtenemos la clave de traducción desde description o usamos el feature_code como fallback
+          final description = feature['description'] as String? ?? 'menu.features.$featureCode';
 
           // Asignamos el ícono basado en el feature_code si el icon_name es nulo o no está en el mapa.
           final iconData = _iconMap[iconName] ?? _iconMap[featureCode] ?? FontAwesomeIcons.questionCircle;
@@ -422,6 +421,7 @@ class _MenuPageState extends State<MenuPage> {
             ...feature,
             'icon': finalIconWidget, // El ícono ahora siempre es el correcto, solo cambia el color.
             'color': iconColor,
+            'translationKey': description, // Agregamos la clave de traducción para usar en la UI
           };
         }).toList();
 
@@ -559,11 +559,12 @@ class _MenuPageState extends State<MenuPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               iconWidget,
-              // CORRECCIÓN: Usamos el feature_code para obtener la traducción.
+              // CORRECCIÓN: Usamos la clave de traducción desde la BD (description)
               // El fallback al feature_code asegura que siempre se muestre algo si la traducción no existe.
               const SizedBox(height: 4),
               Builder(builder: (context) {
-                final label = i18n.t('menu.features.$featureCode') ?? featureCode;
+                final translationKey = item['translationKey'] as String? ?? 'menu.features.$featureCode';
+                final label = i18n.t(translationKey);
                 return Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 8),
@@ -612,12 +613,16 @@ class _MenuPageState extends State<MenuPage> {
   Widget _buildLockedFeatureCard() {
     if (_selectedLockedFeature == null) return const SizedBox.shrink();
 
-    final featureCode = _selectedLockedFeature!['feature_code'] as String;
     final i18n = Provider.of<I18nProvider>(context, listen: false);
-    // Manejamos la posible errata en el nombre del campo 'locket_cta'
-    final ctaText = i18n.t('lockedFeatures.$featureCode.cta') ?? _selectedLockedFeature!['locket_cta'] ?? _selectedLockedFeature!['locked_cta'] ?? i18n.t('menu.lockedFeatureCta');
-    final lockedTitle = i18n.t('lockedFeatures.$featureCode.title') ?? _selectedLockedFeature!['locked_title'] ?? i18n.t('menu.lockedFeatureTitle');
-    final lockedBody = i18n.t('lockedFeatures.$featureCode.body') ?? _selectedLockedFeature!['locked_body'] ?? i18n.t('menu.lockedFeatureBody');
+    
+    // Obtenemos las claves desde la BD o fallback a las generales
+    final lockedTitleKey = _selectedLockedFeature!['locked_title'] as String? ?? 'menu.lockedFeatureTitle';
+    final lockedBodyKey = _selectedLockedFeature!['locked_body'] as String? ?? 'menu.lockedFeatureBody';
+    final lockedCtaKey = _selectedLockedFeature!['locked_cta'] as String? ?? _selectedLockedFeature!['locket_cta'] as String? ?? 'menu.lockedFeatureCta';
+    
+    final lockedTitle = i18n.t(lockedTitleKey);
+    final lockedBody = i18n.t(lockedBodyKey);
+    final ctaText = i18n.t(lockedCtaKey);
 
     return Center(
       child: GestureDetector(
